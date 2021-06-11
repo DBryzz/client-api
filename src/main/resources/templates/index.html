@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="fragments/home-fragment :: home-head">
+
+    <title>Dashcore - Premium Software & Startup HTML</title><!-- themeforest:css -->
+
+</head>
+
+<body><!--[if lt IE 8]>
+
+<p th:fragment="home-browser-upgrade" class="browserupgrade">You are using an <strong>outdated</strong> browser. Please
+    <a href="http://browsehappy.com/">upgrade
+        your browser</a> to improve your experience.
+</p>
+
+<![endif]-->
+
+<!-- Making stripe menu Start -->
+<nav th:replace="fragments/home-fragment :: home-nav">
+</nav>
+<!-- Making stripe menu End -->
+
+
+<main class="overflow-hidden">
+
+    <!-- Shop Hero Slider Start -->
+    <section th:replace="fragments/home-fragment :: home-slider">
+    </section>
+    <!-- Shop Hero Slider End -->
+
+    <!-- Deals Start -->
+    <section th:replace="fragments/home-fragment :: home-deals">
+    </section>
+    <!-- Deals End -->
+
+    <!-- Offers Start -->
+    <section th:replace="fragments/home-fragment :: home-offers">
+    </section>
+    <!-- Offers End -->
+
+    <!-- Trending Products Start -->
+    <section th:replace="fragments/home-fragment :: home-trending">
+    </section>
+    <!-- Trending Products End -->
+
+    <!-- CTA Promo Start -->
+    <section th:replace="fragments/home-fragment :: home-cta-promo" >
+    </section>
+    <!-- CTA Promo End -->
+
+    <!-- Promos Start -->
+    <section th:replace="fragments/home-fragment :: home-promos" >
+    </section>
+    <!-- Promos End -->
+
+
+    <!-- Banners Start -->
+    <section th:replace="fragments/home-fragment :: home-banner" >
+    </section>
+    <!-- Banners End -->
+
+    <!-- Brands Start -->
+    <section th:replace="fragments/home-fragment :: home-brands"></section>
+    <!-- Brands End -->
+
+    <div th:replace="fragments/home-fragment :: home-relative-position">
+    </div>
+
+    <!-- Footer Start -->
+    <footer th:replace="fragments/home-fragment :: home-footer">
+    </footer>
+    <!-- Footer Start -->
+
+</main>
+
+<!-- themeforest:js -->
+<div th:replace="fragments/home-fragment :: home-scripts">
+</div>
+
+<!-- endinject -->
+</body>
+</html>

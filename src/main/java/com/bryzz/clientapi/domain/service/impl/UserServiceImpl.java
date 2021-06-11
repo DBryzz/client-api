@@ -58,10 +58,12 @@ public class UserServiceImpl implements UserService {
     public UserDTO createUser(UserPostDTO createUserDTO) {
         if (userRepository.existsByUsername(createUserDTO.getUsername())) {
             logger.error("Error: Username is already taken!", new InvalidParameterException());
+            throw new  InvalidParameterException();
         }
 
         if (userRepository.existsByEmail(createUserDTO.getEmail())) {
             logger.error("Error: Email is already in use!", new InvalidParameterException());
+            throw new  InvalidParameterException();
         }
 
         // Create new user's account
@@ -182,7 +184,7 @@ public class UserServiceImpl implements UserService {
     @NotNull
     private UserDTO getUserDTO(User user, List<String> rolesList, String roles) {
         UserDTO userDTO = new UserDTO();
-        userDTO.setUserId(user.getId());
+        userDTO.setUserId(user.getUserId());
         userDTO.setUsername(user.getUsername());
         userDTO.setEmail(user.getEmail());
         userDTO.setRoles(roles);

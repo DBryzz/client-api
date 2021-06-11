@@ -1,5 +1,6 @@
 package com.bryzz.clientapi.domain.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -24,25 +25,33 @@ import java.util.Set;
         })
 public class User {
 
+    /*@JsonIgnore
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private long autoIncrement;*/
+
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private String id;
+    @Column(name = "user_id")
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private long userId;
 
     @NotBlank
     @Size(min = 3, max = 20)
+    @Column(name = "username")
     private String username;
 
     @NotBlank
     @Size(max = 50)
     @Email(message = "Please enter a valid e-mail address")
+    @Column(name = "email")
     private String email;
 
     @NotBlank
     @Size(max = 120)
+    @Column(name = "password")
     private String password;
 
     @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(	name = "user_roles",
+    @JoinTable(	name = "users_roles",
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "role_id"))
     private Set<Role> roles = new HashSet<>();
@@ -59,6 +68,12 @@ public class User {
     private String sex;
 
     @DateTimeFormat(pattern = "yyyy-mm-dd")
+    @Column(name = "dob")
     private Date birthday;
+
+    /*@PrePersist
+    private void prePersistUserId() {
+        userId = Long.toString(getAutoIncrement());
+    }*/
 
 }

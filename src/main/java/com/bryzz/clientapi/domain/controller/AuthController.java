@@ -19,15 +19,15 @@ import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 
 @Controller
-@RequestMapping("/api/user")
-public class UserController {
+@RequestMapping("/api/auth")
+public class AuthController {
 
-    private static Logger logger = LoggerFactory.getLogger(UserController.class);
+    private static Logger logger = LoggerFactory.getLogger(AuthController.class);
 
     private UserService userService;
 
     @Autowired
-    public UserController(UserService userService) {
+    public AuthController(UserService userService) {
         this.userService = userService;
     }
 
@@ -87,7 +87,7 @@ public class UserController {
         return "redirect:/pages/authentication/is-gsm/";
     }
 
-    @GetMapping("/public/users/logout/{userId}")
+    @GetMapping("/logout/{userId}")
     String logoutUser(HttpServletRequest request, HttpServletResponse response, @PathVariable("userId") String currentAuthUserId){
 
         userService.logoutUser(request, response);
