@@ -17,37 +17,64 @@
     <!-- endinject -->
 </head>
 
-<body><!--[if lt IE 8]>
+<body>
 
-<p th:fragment="home-browser-upgrade" class="browserupgrade">You are using an <strong>outdated</strong> browser. Please
-    <a href="http://browsehappy.com/">upgrade
-        your browser</a> to improve your experience.
-</p>
+<div th:fragment="home-browser-upgrade">
+    <!--[if lt IE 8]>
 
-<![endif]-->
+    <p class="browserupgrade">You are using an <strong>outdated</strong> browser. Please
+        <a href="http://browsehappy.com/">upgrade
+            your browser</a> to improve your experience.
+    </p>
+
+    <![endif]-->
+</div>
+
 
 <!-- Making stripe menu Start -->
 <nav th:fragment="home-nav" class="st-nav navbar main-nav navigation fixed-top" id="main-nav">
     <div class="container">
         <ul class="st-nav-menu nav navbar-nav">
-            <li class="st-nav-section nav-item"><a href="#main" class="navbar-brand"><img th:src="@{/assets/img/logo.png}"
-                                                                                          alt="Dashcore"
-                                                                                          class="logo logo-sticky d-block d-md-none">
+            <li class="st-nav-section nav-item"><a href="#main" class="navbar-brand"><img th:src="@{/assets/img/logo.png}" alt="Dashcore" class="logo logo-sticky d-block d-md-none">
+
+
                 <img th:src="@{/assets/img/logo-light.png}" alt="Dashcore" class="logo d-none d-md-block"></a></li>
-            <li class="st-nav-section st-nav-primary nav-item"><a class="st-root-link nav-link" href="../index.html">Home </a><a
-                    class="st-root-link item-products st-has-dropdown nav-link" data-dropdown="blocks">Blocks </a><a
-                    class="st-root-link item-products st-has-dropdown nav-link" data-dropdown="pages">Pages </a><a
-                    class="st-root-link item-company st-has-dropdown nav-link" data-dropdown="components">UI
-                Components </a><a class="st-root-link item-blog st-has-dropdown nav-link" data-dropdown="blog">Blog </a><a
-                    class="st-root-link item-shop st-has-dropdown nav-link" href="../shop/"
-                    data-dropdown="shop">Shop</a></li>
-            <li class="st-nav-section st-nav-secondary nav-item"><a class="btn btn-rounded btn-outline mr-3 px-3"
-                                                                    href="../login.html" target="_blank"><i
-                    class="fas fa-sign-in-alt d-none d-md-inline mr-md-0 mr-lg-2"></i> <span
-                    class="d-md-none d-lg-inline">Login</span> </a><a class="btn btn-rounded btn-solid px-3"
-                                                                      href="../signup.html" target="_blank"><i
-                    class="fas fa-user-plus d-none d-md-inline mr-md-0 mr-lg-2"></i> <span
-                    class="d-md-none d-lg-inline">Signup</span></a></li><!-- Mobile Navigation -->
+            <li class="st-nav-section st-nav-primary nav-item">
+                <a class="st-root-link nav-link" href="../index.html">Home </a>
+                <a class="st-root-link item-products st-has-dropdown nav-link" data-dropdown="blocks">FAQs </a>
+                <a class="st-root-link item-products st-has-dropdown nav-link" data-dropdown="pages">About </a>
+                <a class="st-root-link item-company st-has-dropdown nav-link" data-dropdown="components">Contacts </a>
+                <!--
+                <a class="st-root-link nav-link" href="../index.html">Home </a>
+                <a class="st-root-link item-products st-has-dropdown nav-link" data-dropdown="blocks">Blocks </a>
+                <a class="st-root-link item-products st-has-dropdown nav-link" data-dropdown="pages">Pages </a>
+                <a class="st-root-link item-company st-has-dropdown nav-link" data-dropdown="components">UI Components </a>
+                <a class="st-root-link item-blog st-has-dropdown nav-link" data-dropdown="blog">Blog </a>
+                <a class="st-root-link item-shop st-has-dropdown nav-link" href="../shop/" data-dropdown="shop">Shop</a>
+                -->
+            </li>
+
+            <li th:if="${session.userSessionObj!=null}" class="st-nav-section st-nav-secondary nav-item">
+                <a  th:if="${session.userSessionObj.roles.contains('DEPLOYER') or session.userSessionObj.roles.contains('ADMIN')}" class="btn btn-rounded btn-outline mr-3 px-3" th:href="@{/pages/d}" target="_blank">
+                    <i class="fas fa-columns d-none d-md-inline mr-md-0 mr-lg-2"></i>
+                    <span class="d-md-none d-lg-inline">Dashboard</span>
+                </a>
+                <a class="btn btn-rounded btn-solid px-3" th:href="@{/api/auth/logout/{userId} (userId = ${session.userSessionObj.userId}) }" target="_blank"><i class="fas fa-sign-out-alt d-none d-md-inline mr-md-0 mr-lg-2"></i>
+                    <span class="d-md-none d-lg-inline">Logout</span>
+                </a>
+            </li>
+
+            <li th:unless="${session.userSessionObj!=null}" class="st-nav-section st-nav-secondary nav-item">
+                <a  class="btn btn-rounded btn-outline mr-3 px-3" th:href="@{/pages/p/login-form}" > <!-- target="_blank" -->
+                    <i class="fas fa-sign-in-alt d-none d-md-inline mr-md-0 mr-lg-2"></i>
+                    <span class="d-md-none d-lg-inline">Login</span>
+                </a>
+                <a class="btn btn-rounded btn-solid px-3" th:href="@{/pages/p/registration-form}" >
+                    <i class="fas fa-user-plus d-none d-md-inline mr-md-0 mr-lg-2"></i>
+                    <span class="d-md-none d-lg-inline">Signup</span>
+                </a>
+            </li>
+            <!-- Mobile Navigation -->
             <li class="st-nav-section st-nav-mobile nav-item">
                 <button class="st-root-link navbar-toggler" type="button"><span class="icon-bar"></span> <span
                         class="icon-bar"></span> <span class="icon-bar"></span></button>
@@ -85,6 +112,7 @@
             </li>
         </ul>
     </div>
+
     <div class="st-dropdown-root">
         <div class="st-dropdown-bg">
             <div class="st-alt-bg"></div>
@@ -274,6 +302,18 @@
 </nav>
 <!-- Making stripe menu End -->
 
+<!-- Success Flash Message Start -->
+<div th:fragment="succes-flash-message" th:if="${successMsg}">
+    <div class="alert alert-success" th:text="${successMsg}"></div>
+</div>
+<!-- Success Flash Message End -->
+
+<!-- Error Flash Message Start -->
+<div th:fragment="error-flash-message" th:if="${errorMsg}">
+    <div class="alert alert-danger" th:text="${errorMsg}"></div>
+</div>
+<!-- Error Flash Message End -->
+
 
 <main class="overflow-hidden">
 
@@ -425,7 +465,7 @@
             <div class="row gap-y">
                 <div class="col-md-6">
                     <div class="rounded bg-info shadow image-background off-left-background lift-hover p-4 pl-6 pl-md-9"
-                         style="background-image: url(../img/shop/products/vrglasses.png)">
+                         style="background-image: url(/assets/img/shop/products/vrglasses.png)">
                         <div class="pl-lg-3"><h3 class="bold text-contrast mt-0">VR Glasses</h3>
                             <p class="text-light mt-0">Discover what&#39;s new on Virtual Reality</p><a href="#!"
                                                                                                         class="btn btn-contrast">Shop
@@ -434,7 +474,7 @@
                 </div>
                 <div class="col-md-6">
                     <div class="rounded bg-primary shadow image-background off-left-background lift-hover p-4 pl-6 pl-md-9"
-                         style="background-image: url(../img/shop/products/monitor.png)">
+                         style="background-image: url(/assets/img/shop/products/monitor.png)">
                         <div class="pl-lg-3"><h3 class="bold text-contrast mt-0">Monitors</h3>
                             <p class="text-light mt-0">$30 Off on selected monitors</p><a href="#!"
                                                                                           class="btn btn-contrast">Shop
@@ -740,14 +780,14 @@
                 <div class="col-lg-3 promo-column">
                     <div class="rounded promo-block zoom-background">
                         <div class="absolute top right bottom left image-background cover overlay overlay-dark alpha-1 w-100 h-100"
-                             style="background-image: url(../img/shop/products/wearable.jpg)"></div>
+                             style="background-image: url(/assets/img/shop/products/wearable.jpg)"></div>
                         <div class="content position-relative p-4"><h4 class="text-contrast mt-0">Wearable</h4>
                             <p class="text-light mt-0">Smart electronic devices for your day to day life.</p><a
                                     href="javascript:;" class="btn btn-contrast">Shop Wearable</a></div>
                     </div>
                     <div class="rounded promo-block zoom-background mt-4">
                         <div class="absolute top right bottom left image-background cover overlay overlay-dark alpha-1 w-100 h-100"
-                             style="background-image: url(../img/shop/products/innovative.jpg)"></div>
+                             style="background-image: url(/assets/img/shop/products/innovative.jpg)"></div>
                         <div class="content position-relative p-4"><h4 class="text-contrast mt-0">Innovative</h4>
                             <p class="text-light mt-0">Make your life easeier with these smart solutions.</p><a
                                     href="javascript:;" class="btn btn-contrast">Shop Innovative</a></div>
@@ -756,7 +796,7 @@
                 <div class="col-lg-6 promo-column">
                     <div class="rounded promo-block zoom-background">
                         <div class="absolute top right bottom left image-background cover overlay overlay-light alpha-3 w-100 h-100"
-                             style="background-image: url(../img/shop/products/smartphone.jpg)"></div>
+                             style="background-image: url(/assets/img/shop/products/smartphone.jpg)"></div>
                         <div class="content position-relative p-4"><h4 class="text-darker mt-0">Smartphones</h4>
                             <p class="text-dark mt-0">Your personal smartphone are just one click away.</p><a
                                     href="javascript:;" class="btn btn-contrast">Shop Smartphones</a></div>
@@ -765,14 +805,14 @@
                 <div class="col-lg-3 promo-column">
                     <div class="rounded promo-block zoom-background">
                         <div class="absolute top right bottom left image-background cover overlay overlay-light alpha-3 w-100 h-100"
-                             style="background-image: url(../img/shop/products/wifi.jpg)"></div>
+                             style="background-image: url(/assets/img/shop/products/wifi.jpg)"></div>
                         <div class="content position-relative p-4"><h4 class="text-darker mt-0">Wifi</h4>
                             <p class="text-dark mt-0">Exclusive high quality wifi technology to extend your network.</p>
                             <a href="javascript:;" class="btn btn-contrast">Shop Wifi</a></div>
                     </div>
                     <div class="rounded promo-block zoom-background mt-4">
                         <div class="absolute top right bottom left image-background cover overlay overlay-dark alpha-1 w-100 h-100"
-                             style="background-image: url(../img/shop/products/headphones-yellow-bg.jpg)"></div>
+                             style="background-image: url(/assets/img/shop/products/headphones-yellow-bg.jpg)"></div>
                         <div class="content position-relative p-4"><h4 class="text-contrast mt-0">Headphones</h4>
                             <p class="text-light mt-0">Enjoy your favorite playlist with an amazing sound quality.</p><a
                                     href="javascript:;" class="btn btn-contrast">Shop Headphones</a></div>

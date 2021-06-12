@@ -17,6 +17,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
+import java.util.ArrayList;
+import java.util.List;
 
 @Controller
 @RequestMapping("/api/auth")
@@ -31,8 +33,8 @@ public class AuthController {
         this.userService = userService;
     }
 
-    @PostMapping("/login")
-    public String signIntoAccount(@ModelAttribute @Valid @RequestBody UserLoginDTO loginRequest, BindingResult result,
+    @PostMapping("/mocked/login")
+    public String mockedSignIntoAccount(@ModelAttribute @Valid UserLoginDTO userLoginDTO, BindingResult result,
                                   RedirectAttributes redirectAttributes, Model model, HttpServletRequest request, HttpServletResponse response ) {
 
         String message = "";
@@ -41,23 +43,81 @@ public class AuthController {
             message = "Please verify that all fields are properly filled";
             redirectAttributes.addFlashAttribute("errorMsg", message);
 
-            return "redirect:/pages/authentication/is-gsm/";
+            return "redirect:/pages/p/login-form";
+        }
+
+        logger.info("{}", userLoginDTO);
+
+        String name = userLoginDTO.getUsername();
+        String paswd = userLoginDTO.getPassword();
+
+        UserDTO userDTO = new UserDTO();
+
+        if(name.toLowerCase().equals("bryzz") && paswd.toLowerCase().equals("bryzz123")) {
+            userDTO.setUsername(name);
+            userDTO.setUserId(1l);
+            userDTO.setEmail("domoubrice@gmail.com");
+            userDTO.setFirstName("Domou");
+            userDTO.setLastName("Brice");
+            userDTO.setRoles("ROLE_USER ROLE_DEPLOYER ROLE_ADMIN");
+
+            List<String> sRoles = new ArrayList<>();
+            sRoles.add("ROLE_USER");
+            sRoles.add("ROLE_DEPLOYER");
+            sRoles.add("ROLE_ADMIN");
+
+            userDTO.setSRoles(sRoles);
+            userDTO.setAccessToken("accesstoken2domoubrice1");
+        }
+
+        if(name.toLowerCase().equals("dbryzz") && paswd.toLowerCase().equals("dbryzz123")) {
+            userDTO.setUsername(name);
+            userDTO.setUserId(2l);
+            userDTO.setEmail("domou.brice@yahoo.com");
+            userDTO.setFirstName("Namou");
+            userDTO.setLastName("Armel");
+            userDTO.setRoles("ROLE_USER ROLE_DEPLOYER");
+
+            List<String> sRoles = new ArrayList<>();
+            sRoles.add("ROLE_USER");
+            sRoles.add("ROLE_DEPLOYER");
+
+            userDTO.setSRoles(sRoles);
+
+
+            userDTO.setSRoles(sRoles);
+            userDTO.setAccessToken("accesstoken2NamouArmel2");
+        }
+
+        if(name.toLowerCase().equals("cat") && paswd.toLowerCase().equals("cat123")) {
+            userDTO.setUsername(name);
+            userDTO.setUserId(3l);
+            userDTO.setEmail("cat@meow.to");
+            userDTO.setFirstName("Cat");
+            userDTO.setLastName("Meow");
+            userDTO.setRoles("ROLE_USER");
+
+            List<String> sRoles = new ArrayList<>();
+            sRoles.add("ROLE_USER");
+
+            userDTO.setSRoles(sRoles);
+
+            userDTO.setSRoles(sRoles);
+            userDTO.setAccessToken("accesstoken2catmeow3");
         }
 
         HttpSession session = request.getSession(true);
-        UserDTO userDTO = userService.loginUser(loginRequest, response);
         session.setAttribute("userSessionObj", userDTO);
 
+        logger.info("{}", userDTO);
 
+        message = "Successful login";
+        logger.info(message);
 
-
-            System.out.print("User does not exist");
-            message = "Successful login";
-
-            redirectAttributes.addFlashAttribute("successMsg", message);
+        redirectAttributes.addFlashAttribute("successMsg", message);
 //            model.addAttribute("hasGSM", Boolean.toString(hasGSM));
 
-            return "redirect:/pages/register/is-gsm/";
+        return "redirect:/pages/p/home";
 
     }
 
@@ -72,7 +132,7 @@ public class AuthController {
             message = "Please verify that all fields are properly filled";
             redirectAttributes.addFlashAttribute("errorMsg", message);
 
-            return "redirect:/pages/register";
+            return "redirect:/pages/p/registration-form";
         }
 
         UserDTO userDTO = userService.createUser(createUserDTO);
@@ -84,19 +144,53 @@ public class AuthController {
 
         model.addAttribute("newUser", new UserDTO());
 
-        return "redirect:/pages/authentication/is-gsm/";
+        logger.info("{}", userDTO);
+
+        return "redirect:/pages/p/login-form";
     }
 
-    @GetMapping("/logout/{userId}")
-    String logoutUser(HttpServletRequest request, HttpServletResponse response, @PathVariable("userId") String currentAuthUserId){
+    @PostMapping("/login")
+    public String signIntoAccount(@ModelAttribute @Valid UserLoginDTO userLoginDTO, BindingResult result,
+                                  RedirectAttributes redirectAttributes, Model model, HttpServletRequest request, HttpServletResponse response ) {
 
+        String message = "";
+
+        if (result.hasErrors()) {
+            message = "Please verify that all fields are properly filled";
+            redirectAttributes.addFlashAttribute("errorMsg", message);
+
+            return "redirect:/pages/p/login-form";
+        }
+
+        logger.info("{}", userLoginDTO);
+
+        HttpSession session = request.getSession(true);
+        UserDTO userDTO = userService.loginUser(userLoginDTO, response);
+        session.setAttribute("userSessionObj", userDTO);
+
+        System.out.print("User does not exist");
+        message = "Successful login";
+
+        redirectAttributes.addFlashAttribute("successMsg", message);
+//            model.addAttribute("hasGSM", Boolean.toString(hasGSM));
+
+        return "redirect:/pages/p/home";
+
+    }
+
+
+    @GetMapping("/logout/{userId}")
+    String logoutUser(HttpServletRequest request, HttpServletResponse response,
+                      @PathVariable("userId") String currentAuthUserId, RedirectAttributes redirectAttributes ){
+
+        String message = "";
         userService.logoutUser(request, response);
 
-//        HttpSession session = request.getSession(false);
-//        session.invalidate();
+        message = "Account created successfully";
 
+        redirectAttributes.addFlashAttribute("successMsg", message);
 
-        return "redirect:/pages/home";
+        return "redirect:/pages/p/home";
     }
 
 }

@@ -104,7 +104,18 @@ public class UserServiceImpl implements UserService {
         List<String> roleList = new ArrayList<>();
         user.getRoles().forEach(role -> roleList.add(role.toString()));
         String roleString = String.join(" ", roleList);
+/*
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
 
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+        String jwt = jwtUtils.generateJwtToken(authentication);
+
+        UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+        List<String> roles = userDetails.getAuthorities().stream()
+                .map(item -> item.getAuthority())
+                .collect(Collectors.toList());
+*/
         User savedUser = userRepository.save(user);
 
         UserDTO userDTO = getUserDTO(savedUser, roleList, roleString);
@@ -117,8 +128,25 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDTO loginUser(UserLoginDTO usernamePasswordDTO, HttpServletResponse response) {
+
+/*
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
+
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+        String jwt = jwtUtils.generateJwtToken(authentication);
+
+        UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+        List<String> roles = userDetails.getAuthorities().stream()
+                .map(item -> item.getAuthority())
+                .collect(Collectors.toList());
+*/
+
+
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(usernamePasswordDTO.getUsername(), usernamePasswordDTO.getPassword()));
+
+        logger.info("{}", usernamePasswordDTO);
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
         String jwt = jwtUtils.generateJwtToken(authentication);

@@ -1,3 +1,89 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><!--[if IE]><meta http-equiv="X-UA-Compatible" content="IE=edge" /><![endif]--><meta name="description" content=""><meta name="viewport" content="width=device-width,initial-scale=1"><!-- Place favicon.ico in the root directory --><link rel="apple-touch-icon" href="apple-touch-icon.png"><link rel="icon" href="favicon.ico"><link href="https://fonts.googleapis.com/css?family=Poppins:100,300,400,700,900" rel="stylesheet"><link href="https://fonts.googleapis.com/css?family=Caveat" rel="stylesheet"><title>Dashcore - Premium Software & Startup HTML</title><!-- themeforest:css --><link rel="stylesheet" href="css/vendor.min.css"><link rel="stylesheet" href="css/dashcore.min.css"><!-- endinject --></head><body><!--[if lt IE 8]>
-<p class="browserupgrade">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
-<![endif]--><main><div class="container-fluid"><div class="row align-items-center"><div class="col-md-6 col-lg-7 fullscreen-md d-flex justify-content-center align-items-center overlay gradient gradient-purple-navy alpha-7 image-background cover" style="background-image:url(https://picsum.photos/1920/1200/?random&gravity=south)"><div class="content"><h2 class="display-4 display-md-3 text-contrast mt-4 mt-md-0">Get started with <span class="bold d-block">Dashcore</span></h2><p class="lead text-contrast">Lorem ipsum dolor sit amet, consectetur adipisicing elit.</p><hr class="mt-md-6 w-25"><div class="d-flex flex-column"><p class="small bold text-contrast">Or sign up with</p><nav class="nav mb-4"><a class="btn btn-rounded btn-outline-secondary brand-facebook mr-2" href="#"><i class="fab fa-facebook-f"></i></a> <a class="btn btn-rounded btn-outline-secondary brand-twitter mr-2" href="#"><i class="fab fa-twitter"></i></a> <a class="btn btn-rounded btn-outline-secondary brand-linkedin" href="#"><i class="fab fa-linkedin-in"></i></a></nav></div></div></div><div class="col-md-5 col-lg-4 mx-auto"><div class="register-form mt-5 mt-md-0"><img src="img/logo.png" class="logo img-responsive mb-4 mb-md-6" alt=""><h1 class="text-darker bold">Register</h1><p class="text-secondary mb-4 mb-md-6">Already have an account? <a href="login.html" class="text-primary bold">Login here</a></p><form class="cozy" action="srv/login.php" data-validate-on="submit" novalidate><div class="form-group has-icon"><input type="text" id="register_username" class="form-control form-control-rounded" placeholder="Desired username"> <i class="icon fas fa-user-plus"></i></div><div class="form-group has-icon"><input type="text" id="register_fullname" class="form-control form-control-rounded" placeholder="Full name"> <i class="icon fas fa-address-card"></i></div><div class="form-group has-icon"><input type="text" id="register_email" class="form-control form-control-rounded" placeholder="Valid email"> <i class="icon fas fa-envelope"></i></div><div class="form-group has-icon"><input type="password" id="register_password" class="form-control form-control-rounded" placeholder="Password"> <i class="icon fas fa-lock"></i></div><div class="form-group d-flex align-items-center justify-content-between"><button type="submit" class="btn btn-primary btn-rounded ml-auto">Register <i class="fas fa-long-arrow-alt-right ml-2"></i></button></div></form><div class="mt-5"><p class="small text-secondary">By signing up, I agree to the <a href="terms.html">Terms of Service</a></p></div></div></div></div></div></main><!-- themeforest:js --><script src="js/lib.min.js"></script><script src="js/dashcore.min.js"></script><!-- endinject --></body></html>
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/home-fragment :: home-head">
+    <title>Client | Register</title><!-- themeforest:css -->
+</head>
+<body>
+
+<div th:replace="fragments/home-fragment :: home-browser-upgrade">
+
+</div>
+
+<main>
+    <div class="container-fluid">
+        <div class="row align-items-center">
+            <div class="col-md-6 col-lg-7 fullscreen-md d-flex justify-content-center align-items-center overlay gradient gradient-purple-navy alpha-7 image-background cover"
+                 style="background-image:url(https://picsum.photos/1920/1200/?random&gravity=south)">
+                <div class="content"><h2 class="display-4 display-md-3 text-contrast mt-4 mt-md-0">Get started with
+                    <span class="bold d-block">Dashcore</span></h2>
+                    <p class="lead text-contrast">Lorem ipsum dolor sit amet, consectetur adipisicing elit.</p>
+                    <hr class="mt-md-6 w-25">
+                    <div class="d-flex flex-column"><p class="small bold text-contrast">Or sign up with</p>
+                        <nav class="nav mb-4"><a class="btn btn-rounded btn-outline-secondary brand-facebook mr-2"
+                                                 href="#"><i class="fab fa-facebook-f"></i></a> <a
+                                class="btn btn-rounded btn-outline-secondary brand-twitter mr-2" href="#"><i
+                                class="fab fa-twitter"></i></a> <a
+                                class="btn btn-rounded btn-outline-secondary brand-linkedin" href="#"><i
+                                class="fab fa-linkedin-in"></i></a></nav>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-5 col-lg-4 mx-auto">
+                <div class="register-form mt-5 mt-md-0">
+                    <img th:src="@{/assets/img/logo.png}" class="logo img-responsive mb-4 mb-md-6" alt="">
+                    <h1 class="text-darker bold">Register</h1>
+                    <p class="text-secondary mb-4 mb-md-6">Already have an account?
+                        <a th:href="@{/pages/p/login-form}" class="text-primary bold">Login here</a>
+                    </p>
+                    <form class="cozy" method="post"
+                          th:action="@{/api/auth/register}"
+                          th:object="${createUserDTO}" data-validate-on="submit" > <!-- novalidate -->
+                        <div class="form-group has-icon">
+                            <input type="text" id="register_username"
+                                   th:name="username" class="form-control form-control-rounded"
+                                   placeholder="Desired username">
+                            <i class="icon fas fa-user-plus"></i>
+                        </div>
+                        <div class="form-group has-icon">
+                            <input type="email" id="register_email"
+                                   th:name="email" class="form-control form-control-rounded"
+                                   placeholder="Valid email">
+                            <i class="icon fas fa-envelope"></i>
+                        </div>
+
+                        <div class="form-group has-icon">
+                            <input type="password" id="register_password"
+                                   th:name="password" class="form-control form-control-rounded"
+                                   placeholder="Password">
+                            <i class="icon fas fa-lock"></i>
+                        </div>
+
+                        <label class="control-label bold small text-uppercase text-secondary">What do you intend to do??</label>
+                        <div class="form-group has-icon">
+                            <!--<input type="text" id="register_fullname"
+                                   class="form-control form-control-rounded"
+                                   placeholder="Full name">
+                            <i class="icon fas fa-address-card"></i>-->
+                            <select  th:name="roles" id="roles">
+                                <option value="user" selected>Use Public Containers</option>
+                                <option value="deployer">Develop and Deploy Containers</option>
+                                <option value="admin" disabled>Manage Application</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group d-flex align-items-center justify-content-between">
+                            <button type="submit" class="btn btn-primary btn-rounded ml-auto">Register <i
+                                    class="fas fa-long-arrow-alt-right ml-2"></i></button>
+                        </div>
+                    </form>
+                    <div class="mt-5"><p class="small text-secondary">By signing up, I agree to the <a
+                            href="terms.html">Terms of Service</a></p></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main><!-- themeforest:js -->
+<div th:replace="fragments/home-fragment :: home-scripts"></div>
+</body>
+
+</html>

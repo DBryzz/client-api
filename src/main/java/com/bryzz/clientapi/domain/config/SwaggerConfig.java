@@ -34,7 +34,7 @@ public class SwaggerConfig {
                                 .build()))
                 .select()
                 .apis(RequestHandlerSelectors.basePackage("com.bryzz.clientapi"))
-                .paths(PathSelectors.regex("/api.*"))
+                .paths(PathSelectors.regex("/.*"))
                 .build()
                 .apiInfo(metaInfo());
     }
