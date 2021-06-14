@@ -28,5 +28,10 @@ public class PagesController {
         return "pages/dashboard-index";
     }
 
+    @GetMapping("/d/table")
+    public String showTabularView() {
+        return "pages/tables";
+    }
+
 
 }
