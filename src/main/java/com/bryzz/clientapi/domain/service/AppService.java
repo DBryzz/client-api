@@ -1,6 +1,8 @@
 package com.bryzz.clientapi.domain.service;
 
 
+import com.bryzz.clientapi.domain.dto.AppSourceDTO;
+import com.bryzz.clientapi.domain.dto.AppSourcePostDTO;
 import org.springframework.core.io.Resource;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -9,24 +11,19 @@ import java.util.List;
 
 public interface AppService {
 
-    String saveProduct(String userId, PostProductDTO product, MultipartFile productImage);
+    String saveApplication(Long userId, AppSourcePostDTO appSourcePostDTO, MultipartFile productImage);
 
-    List<ProductDTO> getAllProducts(String orderBy);
+    List<AppSourceDTO> getAllApplications(String orderBy);
 
-    List<ProductDTO> getAllProductsOwnedBy(String userId, String ownedBy);
+    List<AppSourceDTO> getAllApplicationsOwnedBy(Long userId, String ownedBy);
 
-    List<ProductDTO> getAllProductsInCategory(Long categoryId);
 
-    List<ProductDTO> getAllProductsWithProductPriceBetween(Long lowerBound, Long upperBound);
 
-    ProductDTO getProduct(Long id);
+    AppSourceDTO getApplication(Long id);
 
-    void removeProduct(Long id, HttpServletRequest request);
+    void removeApplication(Long id, HttpServletRequest request);
 
-    void updateDatabaseIfPaymentSuccess(OrderDTO orderDTO);
-    void updateDatabaseIfPaymentFailure(OrderDTO orderDTO);
-
-    String updateProduct(String userId, Long id, PostProductDTO product, MultipartFile productImage, HttpServletRequest request);
+    String updateApplication(Long userId, Long id, AppSourcePostDTO appSourcePostDTO, MultipartFile productImage, HttpServletRequest request);
 
     Resource loadImage(String filename);
 }

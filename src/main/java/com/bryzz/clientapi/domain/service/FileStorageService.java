@@ -10,7 +10,7 @@ import java.util.stream.Stream;
 public interface FileStorageService {
     public void init();
 
-    public String save(MultipartFile file, String sellerId);
+    public String save(MultipartFile file, Long deployerId);
 
     public Resource load(String filename);
 

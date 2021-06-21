@@ -32,7 +32,7 @@ public class User {
     @Id
     @Column(name = "user_id")
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private long userId;
+    private Long userId;
 
     @NotBlank
     @Size(min = 3, max = 20)

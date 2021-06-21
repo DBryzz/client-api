@@ -1,9 +1,16 @@
 package com.bryzz.clientapi.domain.service.impl;
 
 
+import com.bryzz.clientapi.domain.constant.AppType;
+import com.bryzz.clientapi.domain.dto.AppSourceDTO;
+import com.bryzz.clientapi.domain.dto.AppSourcePostDTO;
+import com.bryzz.clientapi.domain.model.AppSource;
+import com.bryzz.clientapi.domain.model.User;
+import com.bryzz.clientapi.domain.repository.AppSourceRepository;
 import com.bryzz.clientapi.domain.repository.UserRepository;
 import com.bryzz.clientapi.domain.service.AppService;
 import com.bryzz.clientapi.domain.service.FileStorageService;
+import com.bryzz.clientapi.exceptions.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Sort;
@@ -23,57 +30,42 @@ public class AppServiceImpl implements AppService {
 
 //    private final Path root = Paths.get("uploads");
 
-    private AppRepository appRepository;
+    private AppSourceRepository appSourceRepository;
     private FileStorageService storageService;
     private UserRepository userRepository;
-    private CategoryRepository categoryRepository;
-    private ItemRepository itemRepository;
-    private OrderRepository orderRepository;
 
 
     @Autowired
-    public AppServiceImpl(AppRepository appRepository, FileStorageService storageService,
-                              UserRepository userRepository, CategoryRepository categoryRepository,
-                              ItemRepository itemRepository, OrderRepository orderRepository) {
-        this.appRepository = productRepository;
+    public AppServiceImpl(AppSourceRepository appSourceRepository, FileStorageService storageService,
+                              UserRepository userRepository) {
+        this.appSourceRepository = appSourceRepository;
         this.storageService = storageService;
         this.userRepository = userRepository;
-        this.categoryRepository = categoryRepository;
-        this.itemRepository = itemRepository;
-        this.orderRepository = orderRepository;
     }
 
     @Override
-    public String saveProduct(String userId,
-                              PostProductDTO productDTO, MultipartFile productImage) {
+    public String saveApplication(Long userId,
+                              AppSourcePostDTO appSourcePostDTO, MultipartFile appSourceImage) {
 
-        //PostProductDTO productDTO = getJson(productRequest);
+        //AppSourcePostDTO appSourceDTO = getJson(appSourceRequest);
 
         String imageUrl = "";
         String message = "";
 
-        Long catId = productDTO.getProductCategory().getCategoryId();
-
         Optional<User> userOptional = userRepository.findById(userId);
-        Optional<Category> categoryOptional = categoryRepository.findById(catId);
 
         if (!userOptional.isPresent()) {
             throw new ResourceNotFoundException("User Not Found: UserId - " +userId );
         }
 
-        if (!categoryOptional.isPresent()) {
-            throw new ResourceNotFoundException("Category Not Found: CategoryId - " +catId );
-        }
-
-
         try {
-            imageUrl = storageService.save(productImage, userId);
+            imageUrl = storageService.save(appSourceImage, userId);
 
-            message = "Uploaded the file successfully: " + productImage.getOriginalFilename();
+            message = "Uploaded the file successfully: " + appSourceImage.getOriginalFilename();
             System.out.println(message);
 
         } catch (Exception e) {
-            message = "Could not upload the file: " + productImage.getOriginalFilename() + "!";
+            message = "Could not upload the file: " + appSourceImage.getOriginalFilename() + "!";
             throw new RuntimeException(message);
         }
 
@@ -81,248 +73,150 @@ public class AppServiceImpl implements AppService {
             return imageUrl;
         }
 
-        Product product = copyProductDTOtoProduct(productDTO, new Product());
-        product.setSeller(userOptional.get());
-        product.setProductCategory(categoryOptional.get());
-        product.setProductImageUrl(imageUrl);
+        AppSource appSource = copyAppSourceDTOtoAppSource(appSourcePostDTO, new AppSource());
+        appSource.setDeployer(userOptional.get());
+        appSource.setAppCodeUrl(imageUrl);
 
 
-        productRepository.save(product);
+        appSourceRepository.save(appSource);
 
 
 
-        message = "Product was successfully created \n product url: " + product.getProductImageUrl();
+        message = "AppSource was successfully created \n appSource url: " + appSource.getAppCodeUrl();
         return message;
 
     }
 
     @Override
-    public List<ProductDTO> getAllProducts(String orderBy) {
-        Iterable<Product> products = new ArrayList<>();
+    public List<AppSourceDTO> getAllApplications(String orderBy) {
+        Iterable<AppSource> appSources = new ArrayList<>();
 
         switch (orderBy) {
             case "nameAsc":
-                products = productRepository.findAll(Sort.by(Sort.Direction.ASC, "productName"));
+                appSources = appSourceRepository.findAll(Sort.by(Sort.Direction.ASC, "appSourceName"));
                 break;
             case "nameDsc":
-                products = productRepository.findAll(Sort.by(Sort.Direction.DESC, "productName"));
+                appSources = appSourceRepository.findAll(Sort.by(Sort.Direction.DESC, "appSourceName"));
                 break;
             case "priceAsc":
-                products = productRepository.findAll(Sort.by(Sort.Direction.ASC, "productPrice"));
+                appSources = appSourceRepository.findAll(Sort.by(Sort.Direction.ASC, "appSourcePrice"));
                 break;
             case "priceDsc":
-                products = productRepository.findAll(Sort.by(Sort.Direction.DESC, "productPrice"));
+                appSources = appSourceRepository.findAll(Sort.by(Sort.Direction.DESC, "appSourcePrice"));
                 break;
             case "createdDateAsc":
-                products = productRepository.findAll(Sort.by(Sort.Direction.ASC, "createdDate"));
+                appSources = appSourceRepository.findAll(Sort.by(Sort.Direction.ASC, "createdDate"));
                 break;
             case "createdDateDsc":
-                products = productRepository.findAll(Sort.by(Sort.Direction.DESC, "createdDate"));
+                appSources = appSourceRepository.findAll(Sort.by(Sort.Direction.DESC, "createdDate"));
                 break;
             case "modifiedDateAsc":
-                products = productRepository.findAll(Sort.by(Sort.Direction.ASC, "modifiedDate"));
+                appSources = appSourceRepository.findAll(Sort.by(Sort.Direction.ASC, "modifiedDate"));
                 break;
             case "modifiedDateDsc":
-                products = productRepository.findAll(Sort.by(Sort.Direction.DESC, "modifiedDate"));
+                appSources = appSourceRepository.findAll(Sort.by(Sort.Direction.DESC, "modifiedDate"));
                 break;
             default:
-                products = productRepository.findAll();
+                appSources = appSourceRepository.findAll();
 
         }
 
-//        Iterable<Product> products = productRepository.findAll(Sort.by(Sort.Direction.ASC, "productPrice"));
-        return loadProductDTOS(products);
+//        Iterable<AppSource> appSources = appSourceRepository.findAll(Sort.by(Sort.Direction.ASC, "appSourcePrice"));
+        return loadAppSourceDTOS(appSources);
 
     }
 
     @Override
-    public List<ProductDTO> getAllProductsOwnedBy(String userId, String orderBy) {
+    public List<AppSourceDTO> getAllApplicationsOwnedBy(Long userId, String orderBy) {
 
-        Iterable<Product> products = new ArrayList<>();
+        Iterable<AppSource> appSources = new ArrayList<>();
 
 
         switch (orderBy) {
             case "nameAsc":
-                products = productRepository.findAllBySellerUserIdOrderByProductNameAsc(userId);
+                appSources = appSourceRepository.findAllByDeployerUserIdOrderByAppNameAsc(userId);
                 break;
             case "nameDsc":
-                products = productRepository.findAllBySellerUserIdOrderByProductNameDesc(userId);
+                appSources = appSourceRepository.findAllByDeployerUserIdOrderByAppNameDesc(userId);
                 break;
-            case "priceAsc":
-                products = productRepository.findAllBySellerUserIdOrderByProductPriceAsc(userId);
+            case "typeAsc":
+                appSources = appSourceRepository.findAllByDeployerUserIdOrderByAppTypeAsc(userId);
                 break;
-            case "priceDsc":
-                products = productRepository.findAllBySellerUserIdOrderByProductPriceDesc(userId);
-                break;
-            case "categoryAsc":
-                products = productRepository.findAllBySellerUserIdOrderByProductCategoryAsc(userId);
-                break;
-            case "categoryDsc":
-                products = productRepository.findAllBySellerUserIdOrderByProductCategoryDesc(userId);
-                break;
-            case "quantityAsc":
-                products = productRepository.findAllBySellerUserIdOrderByProductAvailableQuantityAsc(userId);
-                break;
-            case "quantityDsc":
-                products = productRepository.findAllBySellerUserIdOrderByProductAvailableQuantityDesc(userId);
+            case "typeDsc":
+                appSources = appSourceRepository.findAllByDeployerUserIdOrderByAppTypeDesc(userId);
                 break;
             case "createdDateAsc":
-                products = productRepository.findAllBySellerUserIdOrderByCreatedDateAsc(userId);
+                appSources = appSourceRepository.findAllByDeployerUserIdOrderByCreatedDateAsc(userId);
                 break;
             case "createdDateDsc":
-                products = productRepository.findAllBySellerUserIdOrderByCreatedDateDesc(userId);
+                appSources = appSourceRepository.findAllByDeployerUserIdOrderByCreatedDateDesc(userId);
                 break;
             case "modifiedDateAsc":
-                products = productRepository.findAllBySellerUserIdOrderByModifiedDateAsc(userId);
+                appSources = appSourceRepository.findAllByDeployerUserIdOrderByModifiedDateAsc(userId);
                 break;
             case "modifiedDateDsc":
-                products = productRepository.findAllBySellerUserIdOrderByModifiedDateDesc(userId);
+                appSources = appSourceRepository.findAllByDeployerUserIdOrderByModifiedDateDesc(userId);
                 break;
             default:
-                products = productRepository.findAllBySellerUserId(userId);
+                appSources = appSourceRepository.findAllByDeployerUserId(userId);
 
         }
 
-        //Iterable<Product> products = productRepository.findAllBySellerUserId(userId);
-        return loadProductDTOS(products);
+        //Iterable<AppSource> appSources = appSourceRepository.findAllBySellerUserId(userId);
+        return loadAppSourceDTOS(appSources);
     }
 
     @Override
-    public List<ProductDTO> getAllProductsInCategory(Long categoryId) {
-        Iterable<Product> products = productRepository.findAllByProductCategoryCategoryId(categoryId);
-        return loadProductDTOS(products);
+    public AppSourceDTO getApplication(Long id) {
+
+        AppSource appSource = appSourceRepository.findById(id).get();
+
+        return copyAppSourceToAppSourceDTO(appSource, new AppSourceDTO());
     }
 
     @Override
-    public List<ProductDTO> getAllProductsWithProductPriceBetween(Long lowerBound, Long upperBound) {
-        Iterable<Product> products = productRepository.findAllByProductPriceBetweenOrderByProductPriceAsc(lowerBound, upperBound);
-        return loadProductDTOS(products);
-    }
-
-
-    @Override
-    public ProductDTO getProduct(Long id) {
-
-        Product product = productRepository.findById(id).get();
-
-        return copyProductToProductDTO(product, new ProductDTO());
-    }
-
-    @Override
-    public void removeProduct(Long id, HttpServletRequest request) {
+    public void removeApplication(Long id, HttpServletRequest request) {
         String fileUrl ="";
-        if (productRepository.findById(id).isPresent()) {
-            fileUrl = productRepository.findById(id).get().getProductImageUrl();
+        if (appSourceRepository.findById(id).isPresent()) {
+            fileUrl = appSourceRepository.findById(id).get().getAppCodeUrl();
             storageService.deleteFile(fileUrl, request);
-            productRepository.deleteById(id);
+            appSourceRepository.deleteById(id);
         }
 
 
     }
 
     @Override
-    public void updateDatabaseIfPaymentSuccess(OrderDTO orderDTO) {
-        List<Item> orderItems = orderDTO.getOrderItems();
-        orderItems.forEach(item ->
-        {
-            Optional<Product> productOpt = productRepository.findById(item.getItemProduct().getProductId());
-            if (productOpt.isPresent()) {
-
-                Product product = productOpt.get();
-                product.setProductAvailableQuantity(product.getProductAvailableQuantity() - item.getItemQuantity());
-
-                productRepository.save(product);
-                itemRepository.save(item);
-            } else {
-                throw new ResourceNotFoundException("Product does not exist --> ProductId = " + item.getItemProduct().getProductId());
-            }
-
-        });
-
-        Order order = orderRepository.findById(orderDTO.getOrderId()).get();
-
-        order.setOrderStatus(OrderStatus.valueOf(orderDTO.getOrderStatus()));
-        order.setOrderItems(orderItems);
-        order.setBuyer(orderDTO.getBuyer());
-        order.setBuyerPhoneNum(orderDTO.getBuyerPhoneNum());
-        order.setPlacedOn(orderDTO.getPlacedOn());
-        order.setTotalPrice(orderDTO.getTotalPrice());
-
-        orderRepository.save(order);
-
-
-
-    }
-
-    @Override
-    public void updateDatabaseIfPaymentFailure(OrderDTO orderDTO) {
-      /*  List<Item> orderItems = orderDTO.getOrderItems();
-        orderItems.forEach(item ->
-        {
-            Optional<Product> productOpt = productRepository.findById(item.getItemProduct().getProductId());
-            if (productOpt.isPresent()) {
-
-                Product product = productOpt.get();
-                product.setProductAvailableQuantity(product.getProductAvailableQuantity() - item.getItemQuantity());
-
-                productRepository.save(product);
-                itemRepository.save(item);
-            } else {
-                throw new ResourceNotFoundException("Product does not exist --> ProductId = " + item.getItemProduct().getProductId());
-            }
-
-        });*/
-
-        Order order = orderRepository.findById(orderDTO.getOrderId()).get();
-
-        order.setOrderStatus(OrderStatus.CANCELED);
-        order.setOrderItems(orderDTO.getOrderItems());
-        order.setBuyer(orderDTO.getBuyer());
-        order.setBuyerPhoneNum(orderDTO.getBuyerPhoneNum());
-        order.setPlacedOn(orderDTO.getPlacedOn());
-        order.setTotalPrice(orderDTO.getTotalPrice());
-
-        orderRepository.save(order);
-
-
-
-    }
-
-    @Override
-    public String updateProduct(String userId, Long id, PostProductDTO productDTO, MultipartFile productImage, HttpServletRequest request) {
-        Optional<Product> productOpt = productRepository.findById(id);
+    public String updateApplication(Long userId, Long id, AppSourcePostDTO appSourceDTO, MultipartFile appSourceImage, HttpServletRequest request) {
+        Optional<AppSource> appSourceOpt = appSourceRepository.findById(id);
 
         String imageUrl = "";
         String message = "";
 
-        if (productOpt.isPresent()) {
+        if (appSourceOpt.isPresent()) {
 
 
 
-            Long catId = productDTO.getProductCategory().getCategoryId();
 
             Optional<User> userOptional = userRepository.findById(userId);
-            Optional<Category> categoryOptional = categoryRepository.findById(catId);
 
             if (!userOptional.isPresent()) {
                 throw new ResourceNotFoundException("User Not Found: UserId - " +userId );
             }
 
-            if (!categoryOptional.isPresent()) {
-                throw new ResourceNotFoundException("Category Not Found: CategoryId - " +catId );
-            }
 
-            Product productToUpdate = productOpt.get();
-            storageService.deleteFile(productToUpdate.getProductImageUrl(), request);
+
+            AppSource appSourceToUpdate = appSourceOpt.get();
+            storageService.deleteFile(appSourceToUpdate.getAppCodeUrl(), request);
 
             try {
-                imageUrl = storageService.save(productImage, userId);
+                imageUrl = storageService.save(appSourceImage, userId);
 
-                message = "Uploaded the file successfully: " + productImage.getOriginalFilename();
+                message = "Uploaded the file successfully: " + appSourceImage.getOriginalFilename();
                 System.out.println(message);
 
             } catch (Exception e) {
-                message = "Could not upload the file: " + productImage.getOriginalFilename() + "!";
+                message = "Could not upload the file: " + appSourceImage.getOriginalFilename() + "!";
                 throw new RuntimeException(message);
             }
 
@@ -330,24 +224,22 @@ public class AppServiceImpl implements AppService {
                 return imageUrl;
             }
 
-            productToUpdate.setProductName(productDTO.getProductName());
-            productToUpdate.setProductDescription(productDTO.getProductDescription());
-            productToUpdate.setProductPrice(productDTO.getProductPrice());
-            productToUpdate.setProductAvailableQuantity(productDTO.getProductAvailableQuantity());
-            productToUpdate.setSeller(userOptional.get());
-            productToUpdate.setProductCategory(categoryOptional.get());
-            productToUpdate.setProductImageUrl(imageUrl);
-            productToUpdate.setModifiedDate(LocalDateTime.now());
+            appSourceToUpdate.setAppName(appSourceDTO.getAppName());
+            appSourceToUpdate.setAppDescription(appSourceDTO.getAppDescription());
+            appSourceToUpdate.setDeployer(userOptional.get());
+            //appSourceToUpdate.setAppCodeUrl(AppType.JAVA.toString());
+            appSourceToUpdate.setAppCodeUrl(imageUrl);
+            appSourceToUpdate.setModifiedDate(LocalDateTime.now());
 
-            productRepository.save(productToUpdate);
+            appSourceRepository.save(appSourceToUpdate);
 
 
 
-            message = "Product was successfully created \n product url: " + productToUpdate.getProductImageUrl();
+            message = "AppSource was successfully created \n appSource url: " + appSourceToUpdate.getAppCodeUrl();
             return message;
 
         } else {
-            throw new ResourceNotFoundException("Product - "+id+" does not Exist");
+            throw new ResourceNotFoundException("AppSource - "+id+" does not Exist");
         }
 
 
@@ -358,60 +250,57 @@ public class AppServiceImpl implements AppService {
         return storageService.load(filename);
     }
 
-    public List<ProductDTO> loadProductDTOS(Iterable<Product> products) {
-        List<ProductDTO> productDTOS = new ArrayList<>();
-        for (Product product : products) {
-            productDTOS.add(copyProductToProductDTO(product, new ProductDTO()));
+    public List<AppSourceDTO> loadAppSourceDTOS(Iterable<AppSource> appSources) {
+        List<AppSourceDTO> appSourceDTOS = new ArrayList<>();
+        for (AppSource appSource : appSources) {
+            appSourceDTOS.add(copyAppSourceToAppSourceDTO(appSource, new AppSourceDTO()));
         }
 
-        return productDTOS;
+        return appSourceDTOS;
 
     }
 
-    private ProductDTO copyProductToProductDTO(Product product, ProductDTO productDTO) {
+    private AppSourceDTO copyAppSourceToAppSourceDTO(AppSource appSource, AppSourceDTO appSourceDTO) {
 
-        productDTO.setProductId(product.getProductId());
-        productDTO.setProductName(product.getProductName());
-        productDTO.setProductDescription(product.getProductDescription());
-        productDTO.setProductPrice(product.getProductPrice());
-        productDTO.setProductQuantity(product.getProductAvailableQuantity());
-        productDTO.setProductImageUrl(product.getProductImageUrl());
-        productDTO.setSeller(product.getSeller());
-        productDTO.setProductCategory(product.getProductCategory());
+        appSourceDTO.setAppId(appSource.getAppId());
+        appSourceDTO.setAppName(appSource.getAppName());
+        appSourceDTO.setAppDescription(appSource.getAppDescription());
+        appSourceDTO.setAppCodeUrl(appSource.getAppCodeUrl());
+        appSourceDTO.setDeployer(appSource.getDeployer());
+        appSourceDTO.setAppType(appSource.getAppType());
 
-        return productDTO;
+        return appSourceDTO;
     }
 
-    private Product copyProductDTOtoProduct(PostProductDTO productDTO, Product product) {
+    private AppSource copyAppSourceDTOtoAppSource(AppSourcePostDTO appSourcePostDTO, AppSource appSource) {
 
-        product.setProductName(productDTO.getProductName());
-        product.setProductDescription(productDTO.getProductDescription());
-        product.setProductPrice(productDTO.getProductPrice());
-        product.setProductAvailableQuantity(productDTO.getProductAvailableQuantity());
-        product.setCreatedDate(LocalDateTime.now());
-        product.setModifiedDate(LocalDateTime.now());
+        appSource.setAppName(appSourcePostDTO.getAppName());
+        appSource.setAppDescription(appSourcePostDTO.getAppDescription());
+        appSource.setAppType(appSourcePostDTO.getAppType());
+        appSource.setCreatedDate(LocalDateTime.now());
+        appSource.setModifiedDate(LocalDateTime.now());
 
-        return product;
+        return appSource;
     }
 
 
     /**
      * Just a method to convert a string into JSON
-     * Converts a String (product) to PostProductDTO Object
+     * Converts a String (appSource) to AppSourcePostDTO Object
      * */
 
 /*
-    public PostProductDTO getJson(String product) {
-        PostProductDTO productJson = new PostProductDTO();
+    public AppSourcePostDTO getJson(String appSource) {
+        AppSourcePostDTO appSourceJson = new AppSourcePostDTO();
 
         try {
             ObjectMapper objectMapper = new ObjectMapper();
-            productJson = objectMapper.readValue(product, PostProductDTO.class);
+            appSourceJson = objectMapper.readValue(appSource, AppSourcePostDTO.class);
         } catch (IOException err) {
             System.out.printf("Error: ", err.toString());
         }
 
-        return productJson;
+        return appSourceJson;
     }
 */
 

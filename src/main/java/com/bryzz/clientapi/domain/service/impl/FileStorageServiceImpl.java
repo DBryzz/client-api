@@ -43,8 +43,8 @@ public class FileStorageServiceImpl implements FileStorageService {
     }
 
     @Override
-    public String save(MultipartFile file, String sellerId) {
-        String fileName = sellerId +"."+ StringUtils.cleanPath(file.getOriginalFilename());
+    public String save(MultipartFile file, Long deployerId) {
+        String fileName = deployerId +"."+ StringUtils.cleanPath(file.getOriginalFilename());
 
         Path imageUrl = this.root.resolve(fileName);
 
@@ -62,7 +62,7 @@ public class FileStorageServiceImpl implements FileStorageService {
         }
 
         String productUri = ServletUriComponentsBuilder.fromCurrentContextPath()
-                .path("product/" + imageUrl.toString())
+                .path("source-code/" + imageUrl.toString())
                 .toUriString();
 
         return productUri;

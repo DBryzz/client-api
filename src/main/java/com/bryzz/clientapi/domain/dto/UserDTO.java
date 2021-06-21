@@ -8,7 +8,7 @@ import java.util.List;
 @Data
 public class UserDTO {
 
-    private long userId;
+    private Long userId;
     private String username;
     private String firstName;
     private String lastName;
