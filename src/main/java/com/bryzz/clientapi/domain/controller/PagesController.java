@@ -33,5 +33,10 @@ public class PagesController {
         return "pages/tables";
     }
 
+    @GetMapping("/d/app-form")
+    public String showAppForm() {
+        return "pages/app-form";
+    }
+
 
 }

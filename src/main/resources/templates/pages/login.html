@@ -38,7 +38,7 @@
                     <form class="cozy" th:method="post"
                           th:action="@{/api/auth/mocked/login}"
                           th:object="${userLoginDTO}"
-                          data-validate-on="submit" > <!-- novalidate -->
+                          > <!--data-validate-on="submit"  novalidate -->
                         <label class="control-label bold small text-uppercase text-secondary">Username</label>
                         <div class="form-group has-icon">
                             <input type="text" id="login_username"  th:name="username"

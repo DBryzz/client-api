@@ -37,7 +37,7 @@
                     </p>
                     <form class="cozy" method="post"
                           th:action="@{/api/auth/register}"
-                          th:object="${createUserDTO}" data-validate-on="submit" > <!-- novalidate -->
+                          th:object="${createUserDTO}" > <!-- data-validate-on="submit"  novalidate -->
                         <div class="form-group has-icon">
                             <input type="text" id="register_username"
                                    th:name="username" class="form-control form-control-rounded"

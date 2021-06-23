@@ -3,6 +3,8 @@ package com.bryzz.clientapi.domain.service.impl;
 
 import com.bryzz.clientapi.domain.service.FileStorageService;
 import com.bryzz.clientapi.exceptions.ResourceNotFoundException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
@@ -24,20 +26,23 @@ import java.util.stream.Stream;
 
 @Service
 public class FileStorageServiceImpl implements FileStorageService {
+    private static Logger logger = LoggerFactory.getLogger(FileStorageServiceImpl.class);
 
-    private final Path root = Paths.get("src/main/resources/static/images/source-code/");
+    private final Path root = Paths.get("src/main/resources/static/src-code-dir");
 
 
     @Override
     public void init() {
         try {
             if (Files.exists(root)) {
+                logger.info(root.toString() + " already exist");
                 System.out.println(root.toString() + " already exist");
             } else {
                 Files.createDirectory(root);
             }
 
         } catch (IOException e) {
+            logger.info("Could not initialize folder for upload!");
             throw new RuntimeException("Could not initialize folder for upload!");
         }
     }
