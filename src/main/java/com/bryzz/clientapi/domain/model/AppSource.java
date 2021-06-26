@@ -1,5 +1,6 @@
 package com.bryzz.clientapi.domain.model;
 
+import com.bryzz.clientapi.domain.constant.AppStatus;
 import com.bryzz.clientapi.domain.constant.AppType;
 import com.bryzz.clientapi.domain.constant.ERole;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -34,9 +35,14 @@ public class AppSource {
     private String appName;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "role_name", length = 20)
-    @NotBlank(message = "Role name cannot be empty")
+    @Column(name = "app_type", length = 20)
+    @NotBlank(message = "Type cannot be empty")
     private AppType appType;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "app_status", length = 20)
+    @NotBlank(message = "Status cannot be empty")
+    private AppStatus appStatus;
 
     @NotBlank
     @Size(max = 50)

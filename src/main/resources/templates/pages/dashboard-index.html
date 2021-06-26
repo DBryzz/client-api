@@ -27,6 +27,21 @@
                                     </div>
                                 </div>
                             </div>
+                            <div th:each="app : ${deployerApps}" class="col-xl-3 col-md-6">
+
+                                <div class="offset-1 card bg-transparent text-black mb-4">
+                                    <div class="card-body" th:text="${app.getAppName()}">Application 1</div>
+                                    <div class="card-footer d-flex align-items-center justify-content-between" style="float: right;">
+                                        <h8 th:if="${app.appStatus.toString().equals('DnP')}" class="small text-success" th:text="${app.appStatus.toString()}" style="float: left;"></h8>
+                                        <h9 th:if="${app.appStatus.toString().equals('DEPLOYED')}" class="small text-primary" th:text="${app.appStatus.toString()}" style="float: left;"></h9>
+                                        <h10 th:if="${app.appStatus.toString().equals('PUSHED')}" class="small text-secondary" th:text="${app.appStatus.toString()}" style="float: left;"></h10>
+                                        <h11 th:if="${app.appStatus.toString().equals('PENDING')}"class="small text-danger" th:text="${app.appStatus.toString()}" style="float: left;"></h11>
+                                        <a class="small text-black stretched-link" style="float: right;" th:href="@{/page/d/{userId}/show/app/{appId}(userId = ${app.getAppId()}, appId = ${app.getAppId()})}">View Details</a>
+                                        <div class="small text-white"><i class="fas fa-angle-right"></i></div>
+                                    </div>
+
+                                </div>
+                            </div>
                         </div>
 <!--
                         <div class="row">

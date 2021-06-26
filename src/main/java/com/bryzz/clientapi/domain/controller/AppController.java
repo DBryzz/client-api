@@ -6,6 +6,8 @@ import com.bryzz.clientapi.domain.dto.UserDTO;
 import com.bryzz.clientapi.domain.model.AppSource;
 import com.bryzz.clientapi.domain.service.AppService;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
@@ -33,6 +35,8 @@ import java.util.List;
 //@SessionAttributes("sessionInfo")
 public class AppController {
 
+    private static Logger logger = LoggerFactory.getLogger(AppController.class);
+
     /*@Autowired
     private FileStorageService storageService;*/
 
@@ -58,7 +62,7 @@ public class AppController {
 
 
 
-    @PostMapping("/user/{userId}")
+    @PostMapping("/upload/user/{userId}")
 //    @PreAuthorize("hasRole('ADMIN') or hasRole('SELLER')")
     public String uploadApp(@PathVariable("userId") Long userId,
                                                          @ModelAttribute @Valid AppSourcePostDTO appSource,
@@ -96,6 +100,7 @@ public class AppController {
                 fileName.toLowerCase().endsWith(".zip") )) {
             message = "Error: UnSupported file Format. \nfile must be jar, or zip format  ---> " + fileName;
 
+            logger.info(message);
             redirectAttributes.addFlashAttribute("errorMsg", message);
 
             return "redirect:/pages/d/app-form";

@@ -1,5 +1,6 @@
 package com.bryzz.clientapi.domain.repository;
 
+import com.bryzz.clientapi.domain.constant.AppStatus;
 import com.bryzz.clientapi.domain.model.AppSource;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -10,16 +11,21 @@ public interface AppSourceRepository extends JpaRepository<AppSource, Long> {
     Iterable<AppSource> findByAppNameOrderByAppNameAsc(String appName);
     Iterable<AppSource> findByAppNameOrderByAppNameDesc(String appName);
 
-    Iterable<AppSource> findAllByDeployerUserId(long userId);
-    Iterable<AppSource> findAllByDeployerUserIdOrderByAppNameAsc(long userId);
-    Iterable<AppSource> findAllByDeployerUserIdOrderByAppNameDesc(long userId);
-    Iterable<AppSource> findAllByDeployerUserIdOrderByAppTypeAsc(long userId);
-    Iterable<AppSource> findAllByDeployerUserIdOrderByAppTypeDesc(long userId);
-    Iterable<AppSource> findAllByDeployerUserIdOrderByCreatedDateAsc(long userId);
-    Iterable<AppSource> findAllByDeployerUserIdOrderByCreatedDateDesc(long userId);
-    Iterable<AppSource> findAllByDeployerUserIdOrderByUsersAsc(long userId);
-    Iterable<AppSource> findAllByDeployerUserIdOrderByModifiedDateDesc(long userId);
-    Iterable<AppSource> findAllByDeployerUserIdOrderByModifiedDateAsc(long userId);
+    Iterable<AppSource> findAllByDeployerUserId(Long userId);
+    Iterable<AppSource> findAllByDeployerUserIdOrderByAppNameAsc(Long userId);
+    Iterable<AppSource> findAllByDeployerUserIdOrderByAppNameDesc(Long userId);
+    Iterable<AppSource> findAllByDeployerUserIdOrderByAppTypeAsc(Long userId);
+    Iterable<AppSource> findAllByDeployerUserIdOrderByAppTypeDesc(Long userId);
+    Iterable<AppSource> findAllByDeployerUserIdOrderByCreatedDateAsc(Long userId);
+    Iterable<AppSource> findAllByDeployerUserIdOrderByCreatedDateDesc(Long userId);
+    Iterable<AppSource> findAllByDeployerUserIdOrderByUsersAsc(Long userId);
+    Iterable<AppSource> findAllByDeployerUserIdOrderByModifiedDateDesc(Long userId);
+    Iterable<AppSource> findAllByDeployerUserIdOrderByModifiedDateAsc(Long userId);
+
+    Iterable<AppSource> findAllByDeployerUserIdAndAppStatus(Long userId, AppStatus appStatus);
+    Iterable<AppSource> findAllByAppStatusAndDeployer_UserId(AppStatus appStatus, Long userId);
+    Iterable<AppSource> findAllByAppStatus(AppStatus appStatus);
+
 
 
 

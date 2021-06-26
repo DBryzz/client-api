@@ -1,6 +1,7 @@
 package com.bryzz.clientapi.domain.service;
 
 
+import com.bryzz.clientapi.domain.constant.AppStatus;
 import com.bryzz.clientapi.domain.dto.AppSourceDTO;
 import com.bryzz.clientapi.domain.dto.AppSourcePostDTO;
 import org.springframework.core.io.Resource;
@@ -15,7 +16,8 @@ public interface AppService {
 
     List<AppSourceDTO> getAllApplications(String orderBy);
 
-    List<AppSourceDTO> getAllApplicationsOwnedBy(Long userId, String ownedBy);
+    List<AppSourceDTO> getAllApplicationsOwnedBy(Long userId, String orderBy);
+    List<AppSourceDTO> getAllApplicationsWithStatusAndOwnedBy(Long userId, String status);
 
 
 

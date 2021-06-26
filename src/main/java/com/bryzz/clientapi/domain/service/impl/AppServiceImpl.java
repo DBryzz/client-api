@@ -1,7 +1,7 @@
 package com.bryzz.clientapi.domain.service.impl;
 
 
-import com.bryzz.clientapi.domain.constant.AppType;
+import com.bryzz.clientapi.domain.constant.AppStatus;
 import com.bryzz.clientapi.domain.dto.AppSourceDTO;
 import com.bryzz.clientapi.domain.dto.AppSourcePostDTO;
 import com.bryzz.clientapi.domain.model.AppSource;
@@ -11,15 +11,15 @@ import com.bryzz.clientapi.domain.repository.UserRepository;
 import com.bryzz.clientapi.domain.service.AppService;
 import com.bryzz.clientapi.domain.service.FileStorageService;
 import com.bryzz.clientapi.exceptions.ResourceNotFoundException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Sort;
-import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -27,6 +27,9 @@ import java.util.Optional;
 
 @Service
 public class AppServiceImpl implements AppService {
+
+    private static Logger logger = LoggerFactory.getLogger(AppServiceImpl.class);
+
 
 //    private final Path root = Paths.get("uploads");
 
@@ -55,7 +58,9 @@ public class AppServiceImpl implements AppService {
         Optional<User> userOptional = userRepository.findById(userId);
 
         if (!userOptional.isPresent()) {
-            throw new ResourceNotFoundException("User Not Found: UserId - " +userId );
+            message = "User Not Found: UserId - " +userId;
+            logger.info(message);
+            throw new ResourceNotFoundException(message);
         }
 
         try {
@@ -65,7 +70,7 @@ public class AppServiceImpl implements AppService {
             System.out.println(message);
 
         } catch (Exception e) {
-            message = "Could not upload the file: " + appSourceImage.getOriginalFilename() + "!";
+            message = "Could not upload the file: " + appSourceImage.getOriginalFilename() + "  !";
             throw new RuntimeException(message);
         }
 
@@ -162,6 +167,65 @@ public class AppServiceImpl implements AppService {
 
         }
 
+        //Iterable<AppSource> appSources = appSourceRepository.findAllBySellerUserId(userId);
+        return loadAppSourceDTOS(appSources);
+    }
+
+    @Override
+    public List<AppSourceDTO> getAllApplicationsWithStatusAndOwnedBy(Long userId, String appStatus) {
+        logger.info("Top of class");
+
+        Iterable<AppSource> appSources;
+        Iterable<AppSource> appSources1;
+        Iterable<AppSource> appSources2;
+
+        if(appStatus.equals("DnP")) {
+            appSources1 = appSourceRepository.findAllByDeployerUserIdAndAppStatus(userId, AppStatus.DEPLOYED);
+            appSources2 = appSourceRepository.findAllByDeployerUserIdAndAppStatus(userId, AppStatus.PUSHED);
+
+            List<AppSourceDTO> appSourceDTOS = loadAppSourceDTOS(appSources1);
+            List<AppSourceDTO> appSourceDTOS1 = loadAppSourceDTOS(appSources2);
+            appSourceDTOS1.forEach(appSourceDTO -> appSourceDTOS.add(appSourceDTO));
+
+            return appSourceDTOS;
+        }
+
+        logger.info("I got here");
+        appSources = appSourceRepository.findAllByDeployerUserIdAndAppStatus(userId, AppStatus.valueOf(appStatus));
+
+        logger.info("{}", appSources);
+
+        /*
+        switch (orderBy) {
+            case "nameAsc":
+                appSources = appSourceRepository.findAllByDeployerUserIdOrderByAppNameAsc(userId);
+                break;
+            case "nameDsc":
+                appSources = appSourceRepository.findAllByDeployerUserIdOrderByAppNameDesc(userId);
+                break;
+            case "typeAsc":
+                appSources = appSourceRepository.findAllByDeployerUserIdOrderByAppTypeAsc(userId);
+                break;
+            case "typeDsc":
+                appSources = appSourceRepository.findAllByDeployerUserIdOrderByAppTypeDesc(userId);
+                break;
+            case "createdDateAsc":
+                appSources = appSourceRepository.findAllByDeployerUserIdOrderByCreatedDateAsc(userId);
+                break;
+            case "createdDateDsc":
+                appSources = appSourceRepository.findAllByDeployerUserIdOrderByCreatedDateDesc(userId);
+                break;
+            case "modifiedDateAsc":
+                appSources = appSourceRepository.findAllByDeployerUserIdOrderByModifiedDateAsc(userId);
+                break;
+            case "modifiedDateDsc":
+                appSources = appSourceRepository.findAllByDeployerUserIdOrderByModifiedDateDesc(userId);
+                break;
+            default:
+                appSources = appSourceRepository.findAllByDeployerUserId(userId);
+
+        }
+*/
         //Iterable<AppSource> appSources = appSourceRepository.findAllBySellerUserId(userId);
         return loadAppSourceDTOS(appSources);
     }
@@ -268,6 +332,7 @@ public class AppServiceImpl implements AppService {
         appSourceDTO.setAppCodeUrl(appSource.getAppCodeUrl());
         appSourceDTO.setDeployer(appSource.getDeployer());
         appSourceDTO.setAppType(appSource.getAppType());
+        appSourceDTO.setAppStatus(appSource.getAppStatus());
 
         return appSourceDTO;
     }

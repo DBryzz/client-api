@@ -47,7 +47,7 @@ public class User {
 
     @NotBlank
     @Size(max = 120)
-    @Column(name = "password")
+    @Column(name = "passwd")
     private String password;
 
     @ManyToMany(fetch = FetchType.LAZY)
