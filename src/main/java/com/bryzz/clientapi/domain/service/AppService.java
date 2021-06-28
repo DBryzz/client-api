@@ -4,6 +4,8 @@ package com.bryzz.clientapi.domain.service;
 import com.bryzz.clientapi.domain.constant.AppStatus;
 import com.bryzz.clientapi.domain.dto.AppSourceDTO;
 import com.bryzz.clientapi.domain.dto.AppSourcePostDTO;
+import com.bryzz.clientapi.domain.dto.ImageDTO;
+import com.bryzz.clientapi.domain.dto.ImagePostDTO;
 import org.springframework.core.io.Resource;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -19,8 +21,6 @@ public interface AppService {
     List<AppSourceDTO> getAllApplicationsOwnedBy(Long userId, String orderBy);
     List<AppSourceDTO> getAllApplicationsWithStatusAndOwnedBy(Long userId, String status);
 
-
-
     AppSourceDTO getApplication(Long id);
 
     void removeApplication(Long id, HttpServletRequest request);
@@ -28,4 +28,8 @@ public interface AppService {
     String updateApplication(Long userId, Long id, AppSourcePostDTO appSourcePostDTO, MultipartFile productImage, HttpServletRequest request);
 
     Resource loadImage(String filename);
+
+    ImageDTO containerize(Long userId, ImagePostDTO image);
+
+
 }

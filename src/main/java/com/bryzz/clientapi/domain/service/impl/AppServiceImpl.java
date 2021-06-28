@@ -4,12 +4,17 @@ package com.bryzz.clientapi.domain.service.impl;
 import com.bryzz.clientapi.domain.constant.AppStatus;
 import com.bryzz.clientapi.domain.dto.AppSourceDTO;
 import com.bryzz.clientapi.domain.dto.AppSourcePostDTO;
+import com.bryzz.clientapi.domain.dto.ImageDTO;
+import com.bryzz.clientapi.domain.dto.ImagePostDTO;
 import com.bryzz.clientapi.domain.model.AppSource;
+import com.bryzz.clientapi.domain.model.DockerImage;
 import com.bryzz.clientapi.domain.model.User;
 import com.bryzz.clientapi.domain.repository.AppSourceRepository;
+import com.bryzz.clientapi.domain.repository.ImageRepository;
 import com.bryzz.clientapi.domain.repository.UserRepository;
 import com.bryzz.clientapi.domain.service.AppService;
 import com.bryzz.clientapi.domain.service.FileStorageService;
+import com.bryzz.clientapi.exceptions.IOExceptionHandler;
 import com.bryzz.clientapi.exceptions.ResourceNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,9 +25,16 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.ObjectInput;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -31,19 +43,22 @@ public class AppServiceImpl implements AppService {
     private static Logger logger = LoggerFactory.getLogger(AppServiceImpl.class);
 
 
+
 //    private final Path root = Paths.get("uploads");
 
     private AppSourceRepository appSourceRepository;
     private FileStorageService storageService;
     private UserRepository userRepository;
+    private ImageRepository imageRepository;
 
 
     @Autowired
     public AppServiceImpl(AppSourceRepository appSourceRepository, FileStorageService storageService,
-                              UserRepository userRepository) {
+                              UserRepository userRepository, ImageRepository imageRepository) {
         this.appSourceRepository = appSourceRepository;
         this.storageService = storageService;
         this.userRepository = userRepository;
+        this.imageRepository = imageRepository;
     }
 
     @Override
@@ -81,6 +96,7 @@ public class AppServiceImpl implements AppService {
         AppSource appSource = copyAppSourceDTOtoAppSource(appSourcePostDTO, new AppSource());
         appSource.setDeployer(userOptional.get());
         appSource.setAppCodeUrl(imageUrl);
+        appSource.setAppStatus(AppStatus.PENDING);
 
 
         appSourceRepository.save(appSource);
@@ -195,37 +211,6 @@ public class AppServiceImpl implements AppService {
 
         logger.info("{}", appSources);
 
-        /*
-        switch (orderBy) {
-            case "nameAsc":
-                appSources = appSourceRepository.findAllByDeployerUserIdOrderByAppNameAsc(userId);
-                break;
-            case "nameDsc":
-                appSources = appSourceRepository.findAllByDeployerUserIdOrderByAppNameDesc(userId);
-                break;
-            case "typeAsc":
-                appSources = appSourceRepository.findAllByDeployerUserIdOrderByAppTypeAsc(userId);
-                break;
-            case "typeDsc":
-                appSources = appSourceRepository.findAllByDeployerUserIdOrderByAppTypeDesc(userId);
-                break;
-            case "createdDateAsc":
-                appSources = appSourceRepository.findAllByDeployerUserIdOrderByCreatedDateAsc(userId);
-                break;
-            case "createdDateDsc":
-                appSources = appSourceRepository.findAllByDeployerUserIdOrderByCreatedDateDesc(userId);
-                break;
-            case "modifiedDateAsc":
-                appSources = appSourceRepository.findAllByDeployerUserIdOrderByModifiedDateAsc(userId);
-                break;
-            case "modifiedDateDsc":
-                appSources = appSourceRepository.findAllByDeployerUserIdOrderByModifiedDateDesc(userId);
-                break;
-            default:
-                appSources = appSourceRepository.findAllByDeployerUserId(userId);
-
-        }
-*/
         //Iterable<AppSource> appSources = appSourceRepository.findAllBySellerUserId(userId);
         return loadAppSourceDTOS(appSources);
     }
@@ -312,6 +297,111 @@ public class AppServiceImpl implements AppService {
     @Override
     public Resource loadImage(String filename) {
         return storageService.load(filename);
+    }
+
+    @Override
+    public ImageDTO containerize(Long userId, ImagePostDTO imagePostDTO) {
+
+        String pathToShellScript = System.getProperty("user.dir")+"/src/main/resources/static/assets/imageScript.sh"; // "/src/main/resources/static/assets/imageScript.sh";
+        String typeOfShell = "bash";
+
+        String name = imagePostDTO.getImgName();
+        String tag = imagePostDTO.getImgTag();
+        AppStatus status = imagePostDTO.getImageStatus();
+        AppSource srcCode = imagePostDTO.getImgSourceCode();
+        String appType = srcCode.getAppType().toString();
+        String appUrl = srcCode.getAppCodeUrl();
+
+        ImageDTO imageDTO = new ImageDTO();
+
+        DockerImage dockerImage = new DockerImage();
+
+        boolean isWindows = System.getProperty("os.name")
+                .toLowerCase().startsWith("windows");
+
+       /*
+       ProcessBuilder builder = new ProcessBuilder();
+        if (isWindows) {
+            builder.command("cmd.exe", "/c", "dir");
+        } else {
+            builder.command("sh", "-c", "ls");
+        }
+        builder.directory(new File(System.getProperty("user.home")));
+        Process process = builder.start();
+        StreamGobbler streamGobbler =
+                new StreamGobbler(process.getInputStream(), System.out::println);
+        Executors.newSingleThreadExecutor().submit(streamGobbler);
+        int exitCode = process.waitFor();
+        assert exitCode == 0;
+        */
+
+        if (isWindows) {
+            logger.info("This is a Windows Operating System ==> Valid only for Linux or MacOS");
+            throw new IOExceptionHandler("Valid only for Linux or MacOS");
+        }
+
+        Process process;
+        try {
+            List<String> cmdList = new ArrayList<String>();
+            // adding command and args to the list
+            cmdList.add(typeOfShell);
+            cmdList.add(pathToShellScript);
+            ProcessBuilder processBuilder = new ProcessBuilder(cmdList);
+            process = processBuilder.start();
+            logger.info("{}", process);
+            logger.info("{}", process);
+
+            process.waitFor();
+
+            BufferedReader reader=new BufferedReader(new InputStreamReader(
+                    process.getInputStream()));
+            String line;
+            while((line = reader.readLine()) != null) {
+                System.out.println(line);
+            }
+
+
+            DockerImage save = imageRepository.save(copyImageDTOToImage(userId, imagePostDTO));
+            imageDTO = copyImageToImageDTO(userId, save);
+
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
+        return imageDTO;
+    }
+
+    private ImageDTO copyImageToImageDTO(Long userId, DockerImage dockerImage) {
+        ImageDTO imageDTO = new ImageDTO();
+
+        imageDTO.setImgId(dockerImage.getImgId());
+        imageDTO.setImageStatus(dockerImage.getImageStatus());
+        imageDTO.setImgName(dockerImage.getImgName());
+        imageDTO.setImgTag(dockerImage.getImgTag());
+        imageDTO.setImgSourceCode(dockerImage.getImgSourceCode());
+        imageDTO.setDeployer(userRepository.getById(userId));
+        imageDTO.setCreatedDate(LocalDateTime.now());
+        imageDTO.setModifiedDate(LocalDateTime.now());
+
+        return imageDTO;
+    }
+
+    private DockerImage copyImageDTOToImage(Long userId, ImagePostDTO imagePostDTO) {
+        DockerImage dockerImage = new DockerImage();
+
+        dockerImage.setImageStatus(imagePostDTO.getImageStatus());
+        dockerImage.setImgName(imagePostDTO.getImgName());
+        dockerImage.setImgTag(imagePostDTO.getImgTag());
+        dockerImage.setImgSourceCode(imagePostDTO.getImgSourceCode());
+        dockerImage.setDeployer(userRepository.getById(userId));
+        dockerImage.setCreatedDate(LocalDateTime.now());
+        dockerImage.setModifiedDate(LocalDateTime.now());
+
+        return dockerImage;
     }
 
     public List<AppSourceDTO> loadAppSourceDTOS(Iterable<AppSource> appSources) {

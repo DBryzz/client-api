@@ -4,8 +4,9 @@ import com.bryzz.clientapi.domain.constant.AppStatus;
 import com.bryzz.clientapi.domain.model.AppSource;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.stereotype.Repository;
 
-
+@Repository
 public interface AppSourceRepository extends JpaRepository<AppSource, Long> {
     Iterable<AppSource> findByAppName(String appName);
     Iterable<AppSource> findByAppNameOrderByAppNameAsc(String appName);

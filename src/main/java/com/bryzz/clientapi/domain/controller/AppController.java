@@ -1,8 +1,6 @@
 package com.bryzz.clientapi.domain.controller;
 
-import com.bryzz.clientapi.domain.dto.AppSourceDTO;
-import com.bryzz.clientapi.domain.dto.AppSourcePostDTO;
-import com.bryzz.clientapi.domain.dto.UserDTO;
+import com.bryzz.clientapi.domain.dto.*;
 import com.bryzz.clientapi.domain.model.AppSource;
 import com.bryzz.clientapi.domain.service.AppService;
 
@@ -82,7 +80,7 @@ public class AppController {
             message = "Please verify that all fields are properly filled";
             redirectAttributes.addFlashAttribute("errorMsg", message);
 
-            return "redirect:/pages/d/app-form";
+            return "redirect:/pages/d/"+userId+"/app-form";
         }
 
 
@@ -93,7 +91,7 @@ public class AppController {
             message = "Error: Filename contains invalid path sequence ---> " + fileName;
             redirectAttributes.addFlashAttribute("errorMsg", message);
 
-            return "redirect:/pages/d/app-form";
+            return "redirect:/pages/d/"+userId+"/app-form";
         }
 
         if (!(fileName.toLowerCase().endsWith(".jar") ||
@@ -103,7 +101,7 @@ public class AppController {
             logger.info(message);
             redirectAttributes.addFlashAttribute("errorMsg", message);
 
-            return "redirect:/pages/d/app-form";
+            return "redirect:/pages/d/"+userId+"/app-form";
         }
 
         message = appService.saveApplication(userId, appSource, sourceCode);
@@ -115,33 +113,10 @@ public class AppController {
         }
 
 
-        return "redirect:/pages/d";
+        return "redirect:/pages/d/"+userId;
 
     }
 
-    /*
-    @PostMapping("/user-profile/{username}/update-app/{productId}")
-    public String updateProduct(@PathVariable("username") String username, @PathVariable("productId") Long productId,
-                                HttpServletRequest request, Model model, @ModelAttribute @Valid AppSourcePostDTO appSource,
-                                RedirectAttributes redirectAttributes, @RequestPart("image") MultipartFile productImage) {
-        String message = "";
-        HttpSession session = request.getSession(false);
-
-        UserDTO userSessionDTO = (UserDTO) session.getAttribute("userSessionObj");
-        message = appService.updateApplication(userSessionDTO.getUserId(), productId, appSource, productImage, request);
-
-
-        if (message.contains("Error")) {
-            redirectAttributes.addFlashAttribute("errorMsg", message);
-        } else {
-            redirectAttributes.addFlashAttribute("successMsg", message);
-        }
-
-//        model.addAttribute("categories", categoryService.getCategories());
-        model.addAttribute("products", appService.getAllApplicationsOwnedBy(userSessionDTO.getUserId(), "default"));
-        return "redirect:/pages/user-profile/{username}/modifiedDateDsc";
-    }
-     */
 
     @GetMapping("/all")
     public ResponseEntity<List<AppSourceDTO>> getListOfAllApps() {
@@ -177,5 +152,55 @@ public class AppController {
 
         return "redirect:/pages/user-profile/" + userSessionDTO.getUsername();
     }
+
+
+    /**
+     *  Image and Container
+     */
+
+    @PostMapping("/create-img/user/{userId}")
+    public String makeContainer(@PathVariable("userId") Long userId,
+                            @ModelAttribute @Valid ImagePostDTO imagePostDTO,
+                            BindingResult result,
+                            HttpServletRequest request,
+                            RedirectAttributes redirectAttributes) {
+
+
+        String message = "";
+
+
+        HttpSession session = request.getSession(false);
+        UserDTO userSessionDTO = (UserDTO) session.getAttribute("userSessionObj");
+
+
+        if (result.hasErrors()) {
+            message = "Please verify that all fields are properly filled";
+            redirectAttributes.addFlashAttribute("errorMsg", message);
+
+            return "redirect:/pages/d/"+userId+"/show/app/"+imagePostDTO.getImgSourceCode().getAppId();
+        }
+
+
+        // Normalize file name
+        /*String fileName = StringUtils.cleanPath(sourceCode.getOriginalFilename());
+
+
+
+        message = appService.saveApplication(userId, appSource, sourceCode);*/
+
+        if (message.contains("Error")) {
+            redirectAttributes.addFlashAttribute("errorMsg", message);
+        } else {
+            redirectAttributes.addFlashAttribute("successMsg", message);
+        }
+
+        ImageDTO containerize = appService.containerize(userId, imagePostDTO);
+
+        logger.info("{}", containerize);
+
+        return "redirect:/pages/d/"+userId+"/show/app/"+imagePostDTO.getImgSourceCode().getAppId();
+
+    }
+
 
 }

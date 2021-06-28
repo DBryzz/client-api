@@ -1,5 +1,6 @@
 package com.bryzz.clientapi.domain.controller;
 
+import com.bryzz.clientapi.domain.dto.ImagePostDTO;
 import com.bryzz.clientapi.domain.service.AppService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -7,8 +8,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+
+import javax.validation.Valid;
 
 @Controller
 @RequestMapping("/pages")
@@ -76,10 +80,19 @@ public class PagesController {
     }
 
     @GetMapping("/d/{userId}/show/app/{appId}")
+    public String showContainerForm(@PathVariable(name = "userId") Long id,
+                                    @PathVariable(name = "appId") Long appId,
+                                    @ModelAttribute @Valid ImagePostDTO imagePostDTO, Model model) {
+        logger.info(System.getProperty("user.dir"));
+        model.addAttribute("appSource", appService.getApplication(appId));
+        return "pages/edit-deploy";
+    }
+
+   /* @GetMapping("/d/{userId}/show/app/{appId}")
     public String showAppDeployPage(@PathVariable(name = "userId") Long id, @PathVariable(name = "appId") Long appId, Model model) {
         model.addAttribute("deployerApps", appService.getApplication(appId));
         return "pages/tables";
-    }
+    }*/
 
 
 }

@@ -28,40 +28,33 @@
                         <div class="row justify-content-center">
                             <div class="col-lg-5">
                                 <div class="card shadow-lg border-0 rounded-lg mt-5">
-                                    <div class="card-header"><h3 class="text-center font-weight-light my-4">Upload Code</h3></div>
+                                    <div class="card-header"><h3 class="text-center font-weight-light my-4">C o n t a i n e r i z e</h3></div>
                                     <div class="card-body">
                                         <form method="post"
-                                              th:action="@{/api/apps/upload/user/{userId}(userId=${session.userSessionObj.userId})}"
-                                              th:object="${appSource}"
-                                              enctype="multipart/form-data">
+                                              th:action="@{/api/apps/create-img/user/{userId}(userId=${session.userSessionObj.userId})}"
+                                              th:object="${imagePostDTO}">
                                             <div class="form-floating mb-3">
-                                                <input class="form-control" th:name="appName" id="inputEmail" type="text" placeholder="Project I" />
-                                                <label for="inputEmail">Application Name</label>
+                                                <input class="form-control" th:name="imgSourceCode" th:value="${appSource.getAppId()}" id="inputEmail" type="text" th:placeholder="${appSource.getAppName()}" th:readonly="${appSource.appName}" />
+<!--                                                <label for="inputEmail" th:text="${appSource.getAppName()}"></label>-->
                                             </div>
                                             <div class="form-floating mb-3">
-                                                <input class="form-control" th:name="appDescription" id="inputPassword" type="text" placeholder="About Project I" />
-                                                <label for="inputPassword">Description</label>
+                                                <input class="form-control" th:name="imgName" id="inputEmail" type="text" placeholder="Image Name" />
+                                                <label for="inputEmail">Image Name</label>
                                             </div>
-                                            <div class="form-floating mb-3" id="appTypeId">
-                                                <select  th:name="roles" id="roles">
-                                                    <option value="PHP">PHP</option>
-                                                    <option value="JAVA" selected>JAVA</option>
-                                                    <option value="MAVEN">MAVEN</option>
-                                                    <option value="LARAVEL">LARAVEL</option>
+                                            <div class="form-floating mb-3">
+                                                <input class="form-control" th:name="imgTag" id="inputPassword" type="text" placeholder="Tag" />
+                                                <label for="inputPassword">Tag</label>
+                                            </div>
+
+                                            <div class="form-floating mb-3" id="imageStatus">
+                                                <select  th:name="imageStatus" id="roles">
+                                                    <option value="DEPLOYED" selected>Deploy on a Server</option>
+                                                    <option value="PUSHED" selected>Push to DockerHub</option>
+                                                    <option value="DnP">Both</option>
                                                 </select>
                                             </div>
-                                            <!--
-                                            <div class="form-floating mb-3" id="appTypeId">
-                                                JAVA &nbsp; <input class="form-check-input" th:name="appType" type="radio" value="JAVA" /> &nbsp;&nbsp;&nbsp;
-                                                MAVEN &nbsp; <input class="form-check-input" th:name="appType" type="radio" value="MAVEN" /></br>
-                                                PHP &nbsp; <input class="form-check-input" th:name="appType" type="radio" value="PHP" /> &nbsp;&nbsp;&nbsp;
-                                                LARAVEL &nbsp; <input class="form-check-input" th:name="appType" type="radio" value="LARAVEL" />
-                                            </div>
-                                            -->
-                                            <div class="form-check mb-3">
-                                                <input type="file"  class="" name="image" id="image" autocomplete="image" placeholder="product Image" value="" />
-                                            </div>
-                                            <button type="submit">Upload</button>
+
+                                            <button type="submit" class="btn btn-primary">Create Image</button>
 
                                         </form>
                                     </div>

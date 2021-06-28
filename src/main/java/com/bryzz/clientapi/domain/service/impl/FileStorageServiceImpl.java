@@ -67,7 +67,7 @@ public class FileStorageServiceImpl implements FileStorageService {
         }
 
         String productUri = ServletUriComponentsBuilder.fromCurrentContextPath()
-                .path("source-code/" + imageUrl.toString())
+                .path("api/apps/" + imageUrl.toString())
                 .toUriString();
 
         return productUri;
