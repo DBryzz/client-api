@@ -5,10 +5,6 @@ import com.bryzz.clientapi.domain.service.FileStorageService;
 import com.bryzz.clientapi.exceptions.ResourceNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Profile;
-import org.springframework.core.env.Environment;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
@@ -48,11 +44,29 @@ public class FileStorageServiceImpl implements FileStorageService {
     }
 
     @Override
-    public String save(MultipartFile file, Long deployerId) {
-        String fileName = deployerId +"."+ StringUtils.cleanPath(file.getOriginalFilename());
+    public String save(MultipartFile file, Long deployerId, String appName) {
+        Path imagePath = Paths.get("src/main/resources/static/src-code-dir/"+deployerId+"/"+appName);
+        String fileName = StringUtils.cleanPath(file.getOriginalFilename());
 
-        Path imageUrl = this.root.resolve(fileName);
+        /** creating source code folder **/
+        try {
+            if (Files.exists(imagePath)) {
+                logger.info(imagePath.toString() + " already exist");
+                System.out.println(imagePath.toString() + " already exist");
+            } else {
+                Files.createDirectories(imagePath);
+            }
 
+        } catch (IOException e) {
+            String msg = "Could not create src/main/resources/static/src-code-dir/"+deployerId+"/"+appName;
+            logger.info(msg);
+            throw new RuntimeException(msg);
+        }
+
+
+        /** saving source code **/
+
+        Path imageUrl = imagePath.resolve(fileName);
 
         try {
             Resource resource = new UrlResource(imageUrl.toUri());
@@ -74,9 +88,9 @@ public class FileStorageServiceImpl implements FileStorageService {
     }
 
     @Override
-    public Resource load(String filename) {
+    public Resource load(Long deployerId, String appName, String filename) {
         try {
-            Path file = root.resolve(filename).normalize();
+            Path file = root.resolve(deployerId+"/"+appName+"/"+filename).normalize();
             Resource resource = new UrlResource(file.toUri());
             if (resource.exists() || resource.isReadable()) {
                 return resource;
@@ -94,12 +108,7 @@ public class FileStorageServiceImpl implements FileStorageService {
     }
 
     @Override
-    public void deleteFile(String fileUrl, HttpServletRequest request) {
-
-        /*String hostDomainName = request.getHeader("host");
-        String imagePath = "http://"+hostDomainName + "/product/src/main/resources/static/images/product-dir/";
-        int imagePathSize = imagePath.length();*/
-
+    public void deleteFile(Long deployerId, String appName, String fileUrl, HttpServletRequest request) {
 
         String filename = StringUtils.getFilename(fileUrl).replace("%20", " ");
 
@@ -111,16 +120,20 @@ public class FileStorageServiceImpl implements FileStorageService {
 
 
         try {
-            Path file = root.resolve(filename).normalize();
+            Path file = root.resolve(deployerId+"/"+appName+"/"+filename).normalize();
+            Path dir = root.resolve(deployerId+"/"+appName).normalize();
             Resource resource = new UrlResource(file.toUri());
             File file1 = new File(file.toString());
             if (resource.exists() || resource.isReadable()) {
                 file1.delete();
+                Files.delete(dir);
             } else {
                 throw new ResourceNotFoundException("Could not read the file!");
             }
         } catch (MalformedURLException e) {
             throw new ResourceNotFoundException("Error: " + e.getMessage());
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 

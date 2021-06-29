@@ -133,22 +133,22 @@ public class AppController {
     }
 
 
-    @GetMapping("/src/main/resources/static/src-code-dir/{filename}")
+    @GetMapping("/src/main/resources/static/src-code-dir/{userId}/{appName}/{filename}")
     @ResponseBody
-    public ResponseEntity<Resource> getFile(@PathVariable String filename) {
-        Resource file = appService.loadImage(filename);
+    public ResponseEntity<Resource> getFile(@PathVariable("userId") Long userId, @PathVariable("appName") String appName, @PathVariable String filename) {
+        Resource file = appService.loadImage(userId, appName, filename);
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + file.getFilename() + "\"").body(file);
     }
 
-    @PostMapping("/remove/user/{userId}/app/{appId}")
+    @PostMapping("/remove/user/{deployerId}/app/{appId}")
     @ResponseBody
-    public String deleteProduct(@PathVariable("appId") Long id, HttpServletRequest request) {
+    public String deleteProduct(@PathVariable("deployerId") Long deployerId, @PathVariable("appId") Long appId,  HttpServletRequest request) {
         /*System.out.println(request.getRemoteAddr() + "hkhkhkhkh");
         System.out.println(request.getHeader("host") + "hkhkhkhkh");*/
         HttpSession session = request.getSession();
         UserDTO userSessionDTO = (UserDTO) session.getAttribute("userSessionObj");
-        appService.removeApplication(id, request);
+        appService.removeApplication(deployerId, appId, request);
 
         return "redirect:/pages/user-profile/" + userSessionDTO.getUsername();
     }

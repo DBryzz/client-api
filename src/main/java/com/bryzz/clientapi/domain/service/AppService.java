@@ -23,11 +23,11 @@ public interface AppService {
 
     AppSourceDTO getApplication(Long id);
 
-    void removeApplication(Long id, HttpServletRequest request);
+    void removeApplication(Long deployerId, Long id, HttpServletRequest request);
 
     String updateApplication(Long userId, Long id, AppSourcePostDTO appSourcePostDTO, MultipartFile productImage, HttpServletRequest request);
 
-    Resource loadImage(String filename);
+    Resource loadImage(Long userId, String appName, String filename);
 
     ImageDTO containerize(Long userId, ImagePostDTO image);
 

@@ -36,7 +36,7 @@
                                         <h9 th:if="${app.appStatus.toString().equals('DEPLOYED')}" class="small text-primary" th:text="${app.appStatus.toString()}" style="float: left;"></h9>
                                         <h10 th:if="${app.appStatus.toString().equals('PUSHED')}" class="small text-secondary" th:text="${app.appStatus.toString()}" style="float: left;"></h10>
                                         <h11 th:if="${app.appStatus.toString().equals('PENDING')}"class="small text-danger" th:text="${app.appStatus.toString()}" style="float: left;"></h11>
-                                        <a class="small text-black stretched-link" style="float: right;" th:href="@{/pages/d/{userId}/show/app/{appId}(userId = ${app.getAppId()}, appId = ${app.getAppId()})}">View Details</a>
+                                        <a class="small text-black stretched-link" style="float: right;" th:href="@{/pages/d/{userId}/show/app/{appId}(userId = ${app.getDeployer().userId}, appId = ${app.getAppId()})}">View Details</a>
                                         <div class="small text-white"><i class="fas fa-angle-right"></i></div>
                                     </div>
 

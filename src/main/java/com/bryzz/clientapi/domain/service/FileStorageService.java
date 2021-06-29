@@ -10,13 +10,13 @@ import java.util.stream.Stream;
 public interface FileStorageService {
     public void init();
 
-    public String save(MultipartFile file, Long deployerId);
+    public String save(MultipartFile file, Long deployerId, String appName);
 
-    public Resource load(String filename);
+    public Resource load(Long userId, String appName, String filename);
 
     public void deleteAll();
 
-    public void deleteFile(String fileUrl, HttpServletRequest request);
+    public void deleteFile(Long deployerId, String appName, String fileUrl, HttpServletRequest request);
 
     public Stream<Path> loadAll();
 }

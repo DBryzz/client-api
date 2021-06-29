@@ -23,18 +23,15 @@ import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.ObjectInput;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -79,7 +76,7 @@ public class AppServiceImpl implements AppService {
         }
 
         try {
-            imageUrl = storageService.save(appSourceImage, userId);
+            imageUrl = storageService.save(appSourceImage, userId, appSourcePostDTO.getAppName());
 
             message = "Uploaded the file successfully: " + appSourceImage.getOriginalFilename();
             System.out.println(message);
@@ -224,11 +221,14 @@ public class AppServiceImpl implements AppService {
     }
 
     @Override
-    public void removeApplication(Long id, HttpServletRequest request) {
+    public void removeApplication(Long deployerId, Long id, HttpServletRequest request) {
         String fileUrl ="";
         if (appSourceRepository.findById(id).isPresent()) {
-            fileUrl = appSourceRepository.findById(id).get().getAppCodeUrl();
-            storageService.deleteFile(fileUrl, request);
+            AppSource appSource = appSourceRepository.findById(id).get();
+            fileUrl = appSource.getAppCodeUrl();
+            String appName = appSource.getAppName();
+
+            storageService.deleteFile(deployerId, appName, fileUrl, request);
             appSourceRepository.deleteById(id);
         }
 
@@ -236,7 +236,7 @@ public class AppServiceImpl implements AppService {
     }
 
     @Override
-    public String updateApplication(Long userId, Long id, AppSourcePostDTO appSourceDTO, MultipartFile appSourceImage, HttpServletRequest request) {
+    public String updateApplication(Long deployerId, Long id, AppSourcePostDTO appSourceDTO, MultipartFile appSourceImage, HttpServletRequest request) {
         Optional<AppSource> appSourceOpt = appSourceRepository.findById(id);
 
         String imageUrl = "";
@@ -247,19 +247,19 @@ public class AppServiceImpl implements AppService {
 
 
 
-            Optional<User> userOptional = userRepository.findById(userId);
+            Optional<User> userOptional = userRepository.findById(deployerId);
 
             if (!userOptional.isPresent()) {
-                throw new ResourceNotFoundException("User Not Found: UserId - " +userId );
+                throw new ResourceNotFoundException("User Not Found: UserId - " +deployerId );
             }
 
 
 
             AppSource appSourceToUpdate = appSourceOpt.get();
-            storageService.deleteFile(appSourceToUpdate.getAppCodeUrl(), request);
+            storageService.deleteFile(deployerId, appSourceDTO.getAppName(), appSourceToUpdate.getAppCodeUrl(), request);
 
             try {
-                imageUrl = storageService.save(appSourceImage, userId);
+                imageUrl = storageService.save(appSourceImage, deployerId, appSourceDTO.getAppName());
 
                 message = "Uploaded the file successfully: " + appSourceImage.getOriginalFilename();
                 System.out.println(message);
@@ -295,57 +295,62 @@ public class AppServiceImpl implements AppService {
     }
 
     @Override
-    public Resource loadImage(String filename) {
-        return storageService.load(filename);
+    public Resource loadImage(Long userId, String appName, String filename) {
+        return storageService.load(userId, appName, filename);
     }
 
+    /** Containerization **/
     @Override
     public ImageDTO containerize(Long userId, ImagePostDTO imagePostDTO) {
 
+        AppSource srcCode = imagePostDTO.getImgSourceCode();
+
         String pathToShellScript = System.getProperty("user.dir")+"/src/main/resources/static/assets/imageScript.sh"; // "/src/main/resources/static/assets/imageScript.sh";
         String typeOfShell = "bash";
-
         String name = imagePostDTO.getImgName();
         String tag = imagePostDTO.getImgTag();
         AppStatus status = imagePostDTO.getImageStatus();
-        AppSource srcCode = imagePostDTO.getImgSourceCode();
         String appType = srcCode.getAppType().toString();
         String appUrl = srcCode.getAppCodeUrl();
+        String extension = appUrl.substring(appUrl.length()-4);
+        String appDir = System.getProperty("user.dir")+"/src/main/resources/static/src-code-dir/"+userId+"/"+srcCode.getAppName();
+
+        String s = ServletUriComponentsBuilder.fromCurrentContextPath()
+                .path("api/apps//src/main/resources/static/src-code-dir/" + userId + "/" + srcCode.getAppName()+"/")
+                .toUriString();
+        String sourceCodeName = appUrl.substring(s.length());
+
+//        String sourceCodeName = appUrl+.substring() System.getProperty("user.dir")+"/src/main/resources/static/src-code-dir/"+userId+"/"+srcCode.getAppName();
 
         ImageDTO imageDTO = new ImageDTO();
-
         DockerImage dockerImage = new DockerImage();
 
+        /** Assert it is not windows */
         boolean isWindows = System.getProperty("os.name")
                 .toLowerCase().startsWith("windows");
-
-       /*
-       ProcessBuilder builder = new ProcessBuilder();
-        if (isWindows) {
-            builder.command("cmd.exe", "/c", "dir");
-        } else {
-            builder.command("sh", "-c", "ls");
-        }
-        builder.directory(new File(System.getProperty("user.home")));
-        Process process = builder.start();
-        StreamGobbler streamGobbler =
-                new StreamGobbler(process.getInputStream(), System.out::println);
-        Executors.newSingleThreadExecutor().submit(streamGobbler);
-        int exitCode = process.waitFor();
-        assert exitCode == 0;
-        */
 
         if (isWindows) {
             logger.info("This is a Windows Operating System ==> Valid only for Linux or MacOS");
             throw new IOExceptionHandler("Valid only for Linux or MacOS");
         }
 
+        /** Read Scripts File */
         Process process;
         try {
             List<String> cmdList = new ArrayList<String>();
-            // adding command and args to the list
+
+            /** adding command and args to the list */
+
             cmdList.add(typeOfShell);
             cmdList.add(pathToShellScript);
+            cmdList.add(name);
+            cmdList.add(tag);
+            cmdList.add(appType);
+            cmdList.add(status.toString());
+            cmdList.add(appUrl);
+            cmdList.add(appDir);
+            cmdList.add(extension);
+            cmdList.add(sourceCodeName);
             ProcessBuilder processBuilder = new ProcessBuilder(cmdList);
             process = processBuilder.start();
             logger.info("{}", process);
@@ -360,9 +365,14 @@ public class AppServiceImpl implements AppService {
                 System.out.println(line);
             }
 
+            /*DockerImage save = imageRepository.save(copyImageDTOToImage(userId, imagePostDTO));
 
-            DockerImage save = imageRepository.save(copyImageDTOToImage(userId, imagePostDTO));
-            imageDTO = copyImageToImageDTO(userId, save);
+            AppSource appSourceById = appSourceRepository.getById(srcCode.getAppId());
+            appSourceById.setAppStatus(status);
+            appSourceRepository.save(appSourceById);
+
+
+            imageDTO = copyImageToImageDTO(userId, save); */
 
         } catch (IOException e) {
             // TODO Auto-generated catch block
