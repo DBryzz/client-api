@@ -95,8 +95,9 @@ public class AppController {
         }
 
         if (!(fileName.toLowerCase().endsWith(".jar") ||
+                fileName.toLowerCase().endsWith(".java") ||
                 fileName.toLowerCase().endsWith(".zip") )) {
-            message = "Error: UnSupported file Format. \nfile must be jar, or zip format  ---> " + fileName;
+            message = "Error: UnSupported file Format. \nfile must be .jar, .java or .zip format  ---> " + fileName;
 
             logger.info(message);
             redirectAttributes.addFlashAttribute("errorMsg", message);
