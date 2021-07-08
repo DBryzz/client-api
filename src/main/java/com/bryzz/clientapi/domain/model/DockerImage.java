@@ -40,6 +40,13 @@ public class DockerImage {
     @Column(name = "img_status", length = 20)
     @NotBlank(message = "Status cannot be empty")
     private AppStatus imageStatus;
+    
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(name = "img_users",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "img_id")
+    )
+    private List<User> users;
 
     @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)

@@ -12,19 +12,19 @@ public interface AppSourceRepository extends JpaRepository<AppSource, Long> {
     Iterable<AppSource> findByAppNameOrderByAppNameAsc(String appName);
     Iterable<AppSource> findByAppNameOrderByAppNameDesc(String appName);
 
-    Iterable<AppSource> findAllByDeployerUserId(Long userId);
-    Iterable<AppSource> findAllByDeployerUserIdOrderByAppNameAsc(Long userId);
-    Iterable<AppSource> findAllByDeployerUserIdOrderByAppNameDesc(Long userId);
-    Iterable<AppSource> findAllByDeployerUserIdOrderByAppTypeAsc(Long userId);
-    Iterable<AppSource> findAllByDeployerUserIdOrderByAppTypeDesc(Long userId);
-    Iterable<AppSource> findAllByDeployerUserIdOrderByCreatedDateAsc(Long userId);
-    Iterable<AppSource> findAllByDeployerUserIdOrderByCreatedDateDesc(Long userId);
-    Iterable<AppSource> findAllByDeployerUserIdOrderByUsersAsc(Long userId);
-    Iterable<AppSource> findAllByDeployerUserIdOrderByModifiedDateDesc(Long userId);
-    Iterable<AppSource> findAllByDeployerUserIdOrderByModifiedDateAsc(Long userId);
+    Iterable<AppSource> findAllByUploaderUserId(Long userId);
+    Iterable<AppSource> findAllByUploaderUserIdOrderByAppNameAsc(Long userId);
+    Iterable<AppSource> findAllByUploaderUserIdOrderByAppNameDesc(Long userId);
+    Iterable<AppSource> findAllByUploaderUserIdOrderByAppTypeAsc(Long userId);
+    Iterable<AppSource> findAllByUploaderUserIdOrderByAppTypeDesc(Long userId);
+    Iterable<AppSource> findAllByUploaderUserIdOrderByCreatedDateAsc(Long userId);
+    Iterable<AppSource> findAllByUploaderUserIdOrderByCreatedDateDesc(Long userId);
+    Iterable<AppSource> findAllByUploaderUserIdOrderByUploaderAsc(Long userId);
+    Iterable<AppSource> findAllByUploaderUserIdOrderByModifiedDateDesc(Long userId);
+    Iterable<AppSource> findAllByUploaderUserIdOrderByModifiedDateAsc(Long userId);
 
-    Iterable<AppSource> findAllByDeployerUserIdAndAppStatus(Long userId, AppStatus appStatus);
-    Iterable<AppSource> findAllByAppStatusAndDeployer_UserId(AppStatus appStatus, Long userId);
+    Iterable<AppSource> findAllByUploaderUserIdAndAppStatus(Long userId, AppStatus appStatus);
+    Iterable<AppSource> findAllByAppStatusAndUploader_UserId(AppStatus appStatus, Long userId);
     Iterable<AppSource> findAllByAppStatus(AppStatus appStatus);
 
 

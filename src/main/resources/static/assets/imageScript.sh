@@ -27,6 +27,8 @@ IMAGE_SOURCE_CODE_URL=$5
 IMAGE_SOURCE_CODE_DIR=$6
 IMAGE_EXTENSION=$7
 IMAGE_SOURCE_CODE_NAME=$8
+IMAGE_SOURCE_CODE_NAME_WITHOUT_EXT=$9
+CONTAINER_COUNT=$10
 
 echo "Image Name: $IMAGE_NAME"
 echo "Image Tag: $IMAGE_TAG"
@@ -35,10 +37,13 @@ echo "Image Status: $IMAGE_STATUS"
 echo "Image Source Code Location: $IMAGE_SOURCE_CODE_URL"
 echo "Image Source Code Directory: $IMAGE_SOURCE_CODE_DIR"
 echo "Image Source Code Extension: $IMAGE_EXTENSION"
-echo -e "Image Source Code Name: $IMAGE_SOURCE_CODE_NAME\n"
+echo "Image Source Code Name: $IMAGE_SOURCE_CODE_NAME\n"
+echo -e "Image Source Code Name Without Extension: $IMAGE_SOURCE_CODE_NAME_WITHOUT_EXT\n"
 
-echo "======> Change Working Directory"
-cd $IMAGE_SOURCE_CODE_DIR
+echo `pwd`
+
+echo "======> Change Working Directory To "$IMAGE_SOURCE_CODE_DIR""
+cd "$IMAGE_SOURCE_CODE_DIR"
 ls -l
 
 if [[ "$IMAGE_TYPE" == "JAVA" ]]; then
@@ -47,34 +52,45 @@ if [[ "$IMAGE_TYPE" == "JAVA" ]]; then
     echo -e "\nJAVA-JAR: Creating Dockerfile and .dockerignore file\nSTART...\n"
 
     cat > Dockerfile << EOF
-FROM openjdk:8
+FROM openjdk:8-alpine
 ADD $IMAGE_SOURCE_CODE_NAME  /home/$IMAGE_SOURCE_CODE_NAME
 EXPOSE 8080 			#Add server.port = 8085 to application.properties
 ENTRYPOINT ["java", "-jar", "/home/$IMAGE_SOURCE_CODE_NAME"]
 EOF
 
-  cat > .dockerignore << EOF
+    cat > .dockerignore << EOF
 Dockerfile
 EOF
+
+    echo -e "\nSTOP: Creating Dockerfile\n"
+
   fi
 
-  if [[ "$IMAGE_EXTENSION" == "java" ]]; then
+  if [[ "$IMAGE_EXTENSION" == ".java" ]]; then
     echo -e "\nJAVA-BASIC: Creating Dockerfile and .dockerignore file\nSTART...\n"
 
     cat > Dockerfile << EOF
-FROM openjdk:8
+FROM openjdk:8-alpine
 COPY . /src/java
 WORKDIR /src/java
 RUN ["javac", "$IMAGE_SOURCE_CODE_NAME"]
-ENTRYPOINT ["java", "JavaExample"]
+ENTRYPOINT ["java", "$IMAGE_SOURCE_CODE_NAME_WITHOUT_EXT"]
 EOF
 
-   cat > .dockerignore << EOF
+    cat > .dockerignore << EOF
 Dockerfile
 EOF
+    echo -e "\nSTOP: Creating Dockerfile\n"
+
+    if [[ "$IMAGE_STATUS" == "DEPLOYED" || "$IMAGE_STATUS" == "DnP" ]]; then
+      echo "I'm about to build"
+      docker build -f ./Dockerfile -t "$IMAGE_NAME":latest .
+      docker tag "$IMAGE_NAME":latest "$IMAGE_NAME":"$IMAGE_TAG"   #TODO Tagging with File Name
+      docker run -it "$IMAGE_NAME":"$IMAGE_TAG"
+    fi
+
   fi
 
-  echo -e "\nSTOP: Creating Dockerfile\n"
 fi
 
 
@@ -139,7 +155,7 @@ EOF
   if [[ "$IMAGE_TYPE" == "PHP" ]]; then
     echo -e "\nPHP: Creating Dockerfile and .dockerignore file\nSTART...\n"
     cat > Dockerfile << EOF
-FROM php:7.0-apache
+FROM php:7.2-apache
 RUN apt-get update && \
     apt-get install -y php5-mysql && \
     apt-get clean
@@ -149,6 +165,9 @@ EOF
     cat > .dockerignore << EOF
 Dockerfile
 EOF
+
+    echo -e "\nSTOP: Creating Dockerfile\n"
+
   fi
 
   if [[ "$IMAGE_TYPE" == "LARAVEL" ]]; then
@@ -165,7 +184,7 @@ RUN composer install \
     --no-scripts \
     --prefer-dist
 
-FROM php:7.2-apache-stretch
+FROM php:7.2-apache
 COPY . /var/www/html
 COPY --from=vendor /tmp/vendor/ /var/www/html/vendor/
 EOF

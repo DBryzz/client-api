@@ -38,6 +38,7 @@ import java.util.Optional;
 public class AppServiceImpl implements AppService {
 
     private static Logger logger = LoggerFactory.getLogger(AppServiceImpl.class);
+    private static long containerCount = 0;
 
 
 
@@ -91,7 +92,7 @@ public class AppServiceImpl implements AppService {
         }
 
         AppSource appSource = copyAppSourceDTOtoAppSource(appSourcePostDTO, new AppSource());
-        appSource.setDeployer(userOptional.get());
+        appSource.setUploader(userOptional.get());
         appSource.setAppCodeUrl(imageUrl);
         appSource.setAppStatus(AppStatus.PENDING);
 
@@ -152,31 +153,31 @@ public class AppServiceImpl implements AppService {
 
         switch (orderBy) {
             case "nameAsc":
-                appSources = appSourceRepository.findAllByDeployerUserIdOrderByAppNameAsc(userId);
+                appSources = appSourceRepository.findAllByUploaderUserIdOrderByAppNameAsc(userId);
                 break;
             case "nameDsc":
-                appSources = appSourceRepository.findAllByDeployerUserIdOrderByAppNameDesc(userId);
+                appSources = appSourceRepository.findAllByUploaderUserIdOrderByAppNameDesc(userId);
                 break;
             case "typeAsc":
-                appSources = appSourceRepository.findAllByDeployerUserIdOrderByAppTypeAsc(userId);
+                appSources = appSourceRepository.findAllByUploaderUserIdOrderByAppTypeAsc(userId);
                 break;
             case "typeDsc":
-                appSources = appSourceRepository.findAllByDeployerUserIdOrderByAppTypeDesc(userId);
+                appSources = appSourceRepository.findAllByUploaderUserIdOrderByAppTypeDesc(userId);
                 break;
             case "createdDateAsc":
-                appSources = appSourceRepository.findAllByDeployerUserIdOrderByCreatedDateAsc(userId);
+                appSources = appSourceRepository.findAllByUploaderUserIdOrderByCreatedDateAsc(userId);
                 break;
             case "createdDateDsc":
-                appSources = appSourceRepository.findAllByDeployerUserIdOrderByCreatedDateDesc(userId);
+                appSources = appSourceRepository.findAllByUploaderUserIdOrderByCreatedDateDesc(userId);
                 break;
             case "modifiedDateAsc":
-                appSources = appSourceRepository.findAllByDeployerUserIdOrderByModifiedDateAsc(userId);
+                appSources = appSourceRepository.findAllByUploaderUserIdOrderByModifiedDateAsc(userId);
                 break;
             case "modifiedDateDsc":
-                appSources = appSourceRepository.findAllByDeployerUserIdOrderByModifiedDateDesc(userId);
+                appSources = appSourceRepository.findAllByUploaderUserIdOrderByModifiedDateDesc(userId);
                 break;
             default:
-                appSources = appSourceRepository.findAllByDeployerUserId(userId);
+                appSources = appSourceRepository.findAllByUploaderUserId(userId);
 
         }
 
@@ -193,8 +194,8 @@ public class AppServiceImpl implements AppService {
         Iterable<AppSource> appSources2;
 
         if(appStatus.equals("DnP")) {
-            appSources1 = appSourceRepository.findAllByDeployerUserIdAndAppStatus(userId, AppStatus.DEPLOYED);
-            appSources2 = appSourceRepository.findAllByDeployerUserIdAndAppStatus(userId, AppStatus.PUSHED);
+            appSources1 = appSourceRepository.findAllByUploaderUserIdAndAppStatus(userId, AppStatus.DEPLOYED);
+            appSources2 = appSourceRepository.findAllByUploaderUserIdAndAppStatus(userId, AppStatus.PUSHED);
 
             List<AppSourceDTO> appSourceDTOS = loadAppSourceDTOS(appSources1);
             List<AppSourceDTO> appSourceDTOS1 = loadAppSourceDTOS(appSources2);
@@ -204,7 +205,7 @@ public class AppServiceImpl implements AppService {
         }
 
         logger.info("I got here");
-        appSources = appSourceRepository.findAllByDeployerUserIdAndAppStatus(userId, AppStatus.valueOf(appStatus));
+        appSources = appSourceRepository.findAllByUploaderUserIdAndAppStatus(userId, AppStatus.valueOf(appStatus));
 
         logger.info("{}", appSources);
 
@@ -275,7 +276,7 @@ public class AppServiceImpl implements AppService {
 
             appSourceToUpdate.setAppName(appSourceDTO.getAppName());
             appSourceToUpdate.setAppDescription(appSourceDTO.getAppDescription());
-            appSourceToUpdate.setDeployer(userOptional.get());
+            appSourceToUpdate.setUploader(userOptional.get());
             //appSourceToUpdate.setAppCodeUrl(AppType.JAVA.toString());
             appSourceToUpdate.setAppCodeUrl(imageUrl);
             appSourceToUpdate.setModifiedDate(LocalDateTime.now());
@@ -311,14 +312,32 @@ public class AppServiceImpl implements AppService {
         String tag = imagePostDTO.getImgTag();
         AppStatus status = imagePostDTO.getImageStatus();
         String appType = srcCode.getAppType().toString();
-        String appUrl = srcCode.getAppCodeUrl();
-        String extension = appUrl.substring(appUrl.length()-4);
-        String appDir = System.getProperty("user.dir")+"/src/main/resources/static/src-code-dir/"+userId+"/"+srcCode.getAppName();
+        String appUrl = srcCode.getAppCodeUrl().replace("%20", " ");
 
         String s = ServletUriComponentsBuilder.fromCurrentContextPath()
                 .path("api/apps//src/main/resources/static/src-code-dir/" + userId + "/" + srcCode.getAppName()+"/")
-                .toUriString();
+                .toUriString().replace("%20", " ");
         String sourceCodeName = appUrl.substring(s.length());
+
+        String extension = "";
+        String sourceCodeNameWithoutExt = "";
+        if (sourceCodeName.endsWith(".java")) {
+            extension = ".java";
+            sourceCodeNameWithoutExt = sourceCodeName.replace(".java", "");
+
+        } else {
+            extension = appUrl.substring(appUrl.length()-4);
+            sourceCodeNameWithoutExt = sourceCodeName.substring(sourceCodeName.length(), sourceCodeName.length()-4);
+        }
+
+//        String extension = appUrl.substring(appUrl.length()-4);
+        String appDir = System.getProperty("user.dir")+"/src/main/resources/static/src-code-dir/"+userId+"/"+srcCode.getAppName();
+
+
+        logger.info(s);
+        logger.info(appUrl);
+
+
 
 //        String sourceCodeName = appUrl+.substring() System.getProperty("user.dir")+"/src/main/resources/static/src-code-dir/"+userId+"/"+srcCode.getAppName();
 
@@ -351,6 +370,9 @@ public class AppServiceImpl implements AppService {
             cmdList.add(appDir);
             cmdList.add(extension);
             cmdList.add(sourceCodeName);
+            cmdList.add(sourceCodeNameWithoutExt);
+            cmdList.add(Long.toString(containerCount++));
+
             ProcessBuilder processBuilder = new ProcessBuilder(cmdList);
             process = processBuilder.start();
             logger.info("{}", process);
@@ -430,7 +452,7 @@ public class AppServiceImpl implements AppService {
         appSourceDTO.setAppName(appSource.getAppName());
         appSourceDTO.setAppDescription(appSource.getAppDescription());
         appSourceDTO.setAppCodeUrl(appSource.getAppCodeUrl());
-        appSourceDTO.setDeployer(appSource.getDeployer());
+        appSourceDTO.setUploader(appSource.getUploader());
         appSourceDTO.setAppType(appSource.getAppType());
         appSourceDTO.setAppStatus(appSource.getAppStatus());
 

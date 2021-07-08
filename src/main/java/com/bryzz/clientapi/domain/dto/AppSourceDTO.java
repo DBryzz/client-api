@@ -33,12 +33,9 @@ public class AppSourceDTO {
 
     @NotBlank(message = "url cannot be empty")
     private String appCodeUrl;
+    
 
-
-    private List<User> users;
-
-
-    private User deployer;
+    private User uploader;
 
 
     @NotBlank

@@ -53,17 +53,12 @@ public class AppSource {
     @Column(name = "image_url")
     private String appCodeUrl;
 
-    @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(name = "app_users",
-            joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "app_id")
-    )
-    private List<User> users;
+    
 
     @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinTable(name = "app_deployer")
-    private User deployer;
+    @JoinTable(name = "app_uploader") //uploader
+    private User uploader;
 
 
     @NotBlank
