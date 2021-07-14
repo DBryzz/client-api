@@ -387,14 +387,14 @@ public class AppServiceImpl implements AppService {
                 System.out.println(line);
             }
 
-            /*DockerImage save = imageRepository.save(copyImageDTOToImage(userId, imagePostDTO));
+            DockerImage save = imageRepository.save(copyImageDTOToImage(userId, imagePostDTO));
 
             AppSource appSourceById = appSourceRepository.getById(srcCode.getAppId());
             appSourceById.setAppStatus(status);
             appSourceRepository.save(appSourceById);
 
 
-            imageDTO = copyImageToImageDTO(userId, save); */
+            imageDTO = copyImageToImageDTO(userId, save);
 
         } catch (IOException e) {
             // TODO Auto-generated catch block

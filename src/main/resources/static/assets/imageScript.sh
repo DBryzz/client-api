@@ -1,15 +1,14 @@
 #!/bin/bash
 
-#Author: DBryzz
- /home/dbryzz/Documents/IdeaProjects/client-api/src/main/resources/static/src-code-dir/1/abc2 .jar
+#Author: Domou Brice
+#Email: domoubrice@gmail.com
+
 ##
-# $1 = imageName,
-# $2 = imageTag,
-# $3 = appType,
-# $4 = imageStatus,
-# $5 = srcCodeUrl,
-# $6 = codeDir
-# $7 = extension
+# $1 = imageName,   $6 = codeDir
+# $2 = imageTag,    $7 = extension
+# $3 = appType,     $8 = srcCodeName
+# $4 = imageStatus, $9 = srcCodoeNameWithoutExt
+# $5 = srcCodeUrl,  $10 = containerCount
 ##
 
 #Create Directory and files
@@ -196,6 +195,14 @@ EOF
   fi
 
 fi
+
+
+echo "==========================================================="
+echo "               Containerization Complete                   "
+echo "==========================================================="
+
+
+
 
 #docker run --rm -p 8000:80 -v $(pwd):/var/www/html php:apache #PHP
 #

@@ -22,6 +22,8 @@ insert into users(user_id, email, first_name, last_name, passwd, username)
 values(2, 'domou.brice@yahoo.com', 'Namou', 'Armel', 'dbryzz123', 'dbryzz' );
 insert into users(user_id, email, first_name, last_name, passwd, username)
 values(3, 'cat@meow.to', 'Cat', 'Meow', 'cat123', 'cat' );
+insert into users(user_id, email, first_name, last_name, passwd, username)
+values(4, 'john.doe@email.com', 'John', 'Doe', 'johndoe123', 'johndoe' );
 
 insert into users_roles(user_id, role_id) values (1, 1);
 insert into users_roles(user_id, role_id) values (1, 2);
@@ -29,4 +31,6 @@ insert into users_roles(user_id, role_id) values (1, 3);
 insert into users_roles(user_id, role_id) values (2, 1);
 insert into users_roles(user_id, role_id) values (2, 2);
 insert into users_roles(user_id, role_id) values (3, 1);
+insert into users_roles(user_id, role_id) values (4, 1);
+insert into users_roles(user_id, role_id) values (4, 2);
 */

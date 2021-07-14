@@ -106,6 +106,25 @@ public class AuthController {
             userDTO.setAccessToken("accesstoken2catmeow3");
         }
 
+        if(name.toLowerCase().equals("johndoe") && paswd.toLowerCase().equals("johndoe123")) {
+            userDTO.setUsername(name);
+            userDTO.setUserId(4l);
+            userDTO.setEmail("john.doe@email.com");
+            userDTO.setFirstName("John");
+            userDTO.setLastName("Doe");
+            userDTO.setRoles("ROLE_USER ROLE_DEPLOYER");
+
+            List<String> sRoles = new ArrayList<>();
+            sRoles.add("ROLE_USER");
+            sRoles.add("ROLE_DEPLOYER");
+
+            userDTO.setSRoles(sRoles);
+
+
+            userDTO.setSRoles(sRoles);
+            userDTO.setAccessToken("accesstoken2JohnDoe4");
+        }
+
         HttpSession session = request.getSession(true);
         session.setAttribute("userSessionObj", userDTO);
 
