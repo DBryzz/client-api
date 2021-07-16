@@ -36,7 +36,7 @@ echo "Image Status: $IMAGE_STATUS"
 echo "Image Source Code Location: $IMAGE_SOURCE_CODE_URL"
 echo "Image Source Code Directory: $IMAGE_SOURCE_CODE_DIR"
 echo "Image Source Code Extension: $IMAGE_EXTENSION"
-echo "Image Source Code Name: $IMAGE_SOURCE_CODE_NAME\n"
+echo -e "Image Source Code Name: $IMAGE_SOURCE_CODE_NAME"
 echo -e "Image Source Code Name Without Extension: $IMAGE_SOURCE_CODE_NAME_WITHOUT_EXT\n"
 
 echo `pwd`
@@ -53,7 +53,7 @@ if [[ "$IMAGE_TYPE" == "JAVA" ]]; then
     cat > Dockerfile << EOF
 FROM openjdk:8-alpine
 ADD $IMAGE_SOURCE_CODE_NAME  /home/$IMAGE_SOURCE_CODE_NAME
-EXPOSE 8080 			#Add server.port = 8085 to application.properties
+EXPOSE 8081
 ENTRYPOINT ["java", "-jar", "/home/$IMAGE_SOURCE_CODE_NAME"]
 EOF
 
@@ -81,14 +81,23 @@ Dockerfile
 EOF
     echo -e "\nSTOP: Creating Dockerfile\n"
 
-    if [[ "$IMAGE_STATUS" == "DEPLOYED" || "$IMAGE_STATUS" == "DnP" ]]; then
+  fi
+
+  if [[ "$IMAGE_STATUS" == "DEPLOYED" || "$IMAGE_STATUS" == "DnP" ]]; then
       echo "I'm about to build"
       docker build -f ./Dockerfile -t "$IMAGE_NAME":latest .
       docker tag "$IMAGE_NAME":latest "$IMAGE_NAME":"$IMAGE_TAG"   #TODO Tagging with File Name
-      docker run -it "$IMAGE_NAME":"$IMAGE_TAG"
-    fi
 
-  fi
+      if [[ "$IMAGE_EXTENSION" == ".java" ]]; then
+        docker run -it "$IMAGE_NAME":"$IMAGE_TAG"
+      fi
+
+      if [[ "$IMAGE_EXTENSION" == ".jar" ]]; then
+        docker run -d --name "$IMAGE_NAME" -p 8081:8081 "$IMAGE_NAME":"$IMAGE_TAG"
+      fi
+
+
+    fi
 
 fi
 
